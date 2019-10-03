@@ -1,0 +1,11 @@
+*.sw*
+*.o
+*.pyc
+venv/
+*workspace.xml
+*misc.xml
+*poppin*.iml
+Session.vim
+modules.xml
+profiles_settings.xml
+vcs.xml
