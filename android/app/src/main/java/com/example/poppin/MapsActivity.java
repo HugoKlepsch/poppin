@@ -75,7 +75,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             System.out.println(e.toString());
         }
 
-
         return;
      }
 
