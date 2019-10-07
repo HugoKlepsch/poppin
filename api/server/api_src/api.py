@@ -1,23 +1,19 @@
 """API main"""
 import argparse
 from functools import wraps
-import hashlib
-import json
 import logging
 import os
-import re
 
-from flask import Flask, session, redirect, url_for, send_from_directory
+from flask import Flask, session
 from flask.logging import create_logger
 from flask_apispec import marshal_with
-from marshmallow import fields
 from sqlalchemy.exc import SQLAlchemyError
 from webargs.flaskparser import use_args
 
 from api_src.db import DB
-from api_src.models import User, Item, Picture, Location
-from api_src.models import UserSchema, ItemSchema
-from api_src.schema import JSON_CT, INTERNAL_SERVER_ERROR_JSON_RESPONSE, BAD_REQUEST_JSON_RESPONSE, ok_response
+from api_src.models import Account, Event
+from api_src.models import AccountSchemaOut, EventSchemaIn, EventSchemaOut, AuthenticatedMessageSchema
+from api_src.schema import JSON_CT, INTERNAL_SERVER_ERROR_JSON_RESPONSE, ok_response
 from api_src.schema import JsonApiSchema
 
 
@@ -56,346 +52,142 @@ def setup_database(_app):  # {{{
     """Add some sample data to database"""
     with _app.app_context():
         _app.logger.info('Creating databases')
-        DB.drop_all()  # TODO
+        DB.drop_all()  # TODO do not drop all data on restart
         DB.create_all()
         DB.session.commit()
         _app.logger.info('Created databases')
 
-        example_user = User.query.filter_by(username='bugmommy').first()
-        if example_user is None:
-            _app.logger.info('Creating test user')
-            example_user = User(username='bugmommy',
-                                email='test@email.com',
-                                password_hash=hash_password('asdf'))
-            DB.session.add(example_user)
+        example_account = Account.query.filter_by(device_id='testaccount').first()
+        if example_account is None:
+            _app.logger.info('Creating test account')
+            example_account = Account(device_id='testaccount')
+            DB.session.add(example_account)
             DB.session.commit()
 
-        example_item = Item.query.filter_by(user_id=example_user.id).first()
-        if example_item is None:
-            _app.logger.info('Creating test item')
-            example_item = Item(user_id=example_user.id, name='Test', purchase_price=123,
-                                sell_price=2345)
-            DB.session.add(example_item)
-            example_item_two = Item(user_id=example_user.id, name='Test2', purchase_price=23,
-                                    sell_price=5678)
-            DB.session.add(example_item_two)
-            example_item_three = Item(user_id=example_user.id, name='Test3', purchase_price=1235,
-                                      sell_price=778)
-            DB.session.add(example_item_three)
+        example_event = Event.query.filter_by(account_id=example_account.id).first()
+        if example_event is None:
+            _app.logger.info('Creating test event')
+            example_event = Event(account_id=example_account.id, latitude=32.079663, longitude=34.775528)
+            DB.session.add(example_event)
+            example_event_two = Event(account_id=example_account.id, latitude=43.545199, longitude=-80.246926)
+            DB.session.add(example_event_two)
+            example_event_three = Event(account_id=example_account.id, latitude=43.530793, longitude=-80.229077)
+            DB.session.add(example_event_three)
             DB.session.commit()
 
-        example_picture = Picture.query.filter_by(item_id=example_item.id).first()
-        if example_picture is None:
-            _app.logger.info('Creating test picture')
-            example_picture = Picture(item_id=example_item.id, path='http://reddit.com')
-            DB.session.add(example_picture)
-            DB.session.commit()
-
-        example_location = Location.query.filter_by(name='Freelton Market').first()
-        if example_location is None:
-            _app.logger.info('Creating test location')
-            example_location = Location(name='Freelton Market', user_id=example_user.id)
-            DB.session.add(example_location)
-            DB.session.commit()
-
-        _app.logger.info('Created test user, item, picture and location')
+        _app.logger.info('Created test account and events')
 # }}}
-
-
-def hash_password(password):
-    """
-    Hash the password with md5.
-
-    :param str password: The password to hash
-    :return: The string of hex digits of the hash.
-    :rtype: str
-    """
-    return hashlib.md5(password.encode()).hexdigest()
 
 
 APP = create_app()
 setup_database(APP)
 
 
-def is_logged_in(as_user=None):
+def is_authenticated(payload, as_device=None):
     """
-    Check if the requester is logged in
+    Check if the requester is authenticated
 
-    :param str as_user: Optional username the requester should be logged in as
-    :return: Is the requester logged in
+    :param dict payload: Payload loaded from request. Key 'device_id' should exist
+    :param str as_device: Optional device_id the requester should be authenticated as
+    :return: Is the requester authenticated
     :rtype: bool
     """
-    if 'username' in session:
-        username = session['username']
-        return (User.query.filter_by(username=username).first() is not None) and \
-               (as_user is None or username == as_user)
+    if 'device_id' in payload:
+        device_id = payload['device_id']
+        return (Account.query.filter_by(device_id=device_id).first() is not None) and \
+               (as_device is None or device_id == as_device)
     return False
 
 
-def logged_in(as_user=None):
+def authenticated(as_device=None):
     """
-    Decorator to ensure a user is logged in before calling decorated function.
+    Decorator to ensure a user is authenticated before calling decorated function.
 
-    :param str as_user: Optional username the requester should be logged in as
+    :param str as_device: Optional device_id the requester should be authenticated as
     :return: The decorated function
     :rtype: funct
     """
-    def _logged_in(function):
+    def _authenticated(function):
         @wraps(function)
-        def __logged_in(*args, **kwargs):
+        def __authenticated(payload, *args, **kwargs):
             # just do here everything what you need
 
-            if not is_logged_in(as_user=as_user):
-                return {'msg': 'Not logged in'}, 401, JSON_CT
+            if not is_authenticated(payload=payload, as_device=as_device):
+                return {'msg': 'Not authenticated'}, 401, JSON_CT
 
-            result = function(*args, **kwargs)
-
-            return result
-        return __logged_in
-    return _logged_in
-
-
-def logged_out(redirect_to):
-    """
-    Decorator to ensure a user is logged out before calling decorated function.
-
-    :param str redirect_to: Optional name of function with route that this should redirect to when logged in.
-    :return: The decorated function
-    :rtype: funct
-    """
-    def _logged_out(function):
-        @wraps(function)
-        def __logged_out(*args, **kwargs):
-            # just do here everything what you need
-
-            if is_logged_in():
-                if redirect_to is not None:
-                    return redirect(url_for(redirect_to))
-
-                return json.dumps({
-                    'msg': 'Should not be logged in'
-                }), 400, JSON_CT
-
-            result = function(*args, **kwargs)
+            result = function(payload, *args, **kwargs)
 
             return result
-        return __logged_out
-    return _logged_out
+        return __authenticated
+    return _authenticated
 
 
-@APP.route('/api/login', methods=['POST'])
-@use_args({
-    'username': fields.Str(required=True),
-    'password': fields.Str(required=True)
-})
-@marshal_with(JsonApiSchema())
-def login(credentials):
+@APP.route('/api/all_accounts', methods=['GET'])
+@use_args(AuthenticatedMessageSchema())
+@authenticated(as_device='testaccount')  # TODO create admin account
+@marshal_with(AccountSchemaOut(many=True))
+def all_accounts(_payload):
     """
-    Login API. If credentials are valid, set the session cookie to log the requester in.
+    Get all accounts. Must be authenticated as 'testaccount'.
 
-    :param dict credentials: The sign in credentials.
-    :return: Status of the request. 200 if valid, 400 if not.
-    :rtype: tuple[dict, int, dict]
+    :return: All accounts
+    :rtype: list[Account]
     """
-    username = credentials['username']
-    password_hash = hash_password(credentials['password'])
-
-    user = User.query.filter_by(username=username, password_hash=password_hash).first()
-
-    if user is None:
-        return BAD_REQUEST_JSON_RESPONSE
-
-    session['username'] = username
-    session['user_id'] = user.id
-    return ok_response('Logged in')
+    return Account.query.all()
 
 
-@APP.route('/api/signup', methods=['POST'])
-@use_args({
-    'username': fields.Str(required=True),
-    'email': fields.Str(required=True),
-    'password': fields.Str(required=True)
-})
-@marshal_with(JsonApiSchema())
-def signup(credentials):
+@APP.route('/api/events', methods=['GET'])
+@use_args(AuthenticatedMessageSchema())
+@authenticated()
+@marshal_with(EventSchemaOut(many=True))
+def events(payload):
     """
-    Signup API. If credentials are valid, set the session cookie to log the requester in.
-
-    :param dict credentials: The sign in credentials.
-    :return: Status of the request. 200 if valid, 400 if not.
-    :rtype: tuple[dict, int, dict]
-    """
-
-    username = credentials.get('username', None)
-    email = credentials.get('email', None)
-    password = credentials.get('password', None)
-
-    if username is not None and \
-            email is not None and \
-            password is not None:
-        password_hash = hash_password(password)
-
-        if re.match(r'[a-zA-Z0-9_\-]{4,30}', username) is not None:
-            APP.logger.info('Creating user %s', username)
-            try:
-                user = User(username=username, email=email, password_hash=password_hash)
-                DB.session.add(user)
-                DB.session.commit()
-                return ok_response('User created')
-            except SQLAlchemyError:
-                return INTERNAL_SERVER_ERROR_JSON_RESPONSE
-
-    return BAD_REQUEST_JSON_RESPONSE
-
-
-@APP.route('/api/all_users', methods=['GET'])
-@logged_in(as_user='bugmommy')  # TODO create admin account
-@marshal_with(UserSchema(many=True, exclude=['password_hash', 'items']))
-def all_users():
-    """
-    Get all users. Must be logged in as 'bugmommy'.
-
-    :return: All users
-    :rtype: list[User]
-    """
-    return User.query.all()
-
-
-@APP.route('/api/items', methods=['GET'])
-@logged_in()
-@marshal_with(ItemSchema(many=True))
-def items():
-    """
-    Get all items for the logged in user.
+    Get all items for the authenticated user. TODO this is a bad API interface
 
     :return: All items for the logged in user.
     :rtype: list[Item]
     """
-    username = session['username']
-    user = User.query.filter_by(username=username).first()
-    user_items = Item.query.filter_by(user_id=user.id).all() or []
-    return user_items
+    device_id = payload['device_id'] or ''
+    account = Account.query.filter_by(device_id=device_id).first()
+    if account:
+        return Event.query.filter_by(account_id=account.id).all() or []
+    return []
 
 
-@APP.route('/api/item/<int:item_id>', methods=['DELETE'])
-@logged_in()
+@APP.route('/api/event', methods=['POST'])
+@use_args(EventSchemaIn())
+@authenticated()
 @marshal_with(JsonApiSchema())
-def delete_item(item_id):
+def create_event(event_data):
     """
-    Delete the given item.
+    Create an event.
 
-    :param int item_id: The id of the item to delete.
-    :return: Status of the request. 200 if valid, 400 if not.
-    :rtype: tuple[dict, int, dict]
-    """
-    user_id = session['user_id']
-    try:
-        row = Item.query.filter_by(id=item_id, user_id=user_id).one()
-        DB.session.delete(row)
-        DB.session.commit()
-        return ok_response('Ok, this has been deleted')
-
-    except SQLAlchemyError as exception:
-        APP.logger.error('Failed to delete item %s: %s', item_id, exception)
-        return BAD_REQUEST_JSON_RESPONSE
-
-
-@APP.route('/api/item/<int:_id>', methods=['GET'])
-@logged_in()
-@marshal_with(ItemSchema())
-def get_item(_id):
-    """
-    Get an item for the logged in user.
-
-    :return: Requested item.
-    :rtype: Item
-    """
-    # grab item from the list by id.
-    item = Item.query.get(_id)
-
-    if item is not None:
-        return item
-
-    return BAD_REQUEST_JSON_RESPONSE
-
-
-@APP.route('/api/item', methods=['POST'])
-@logged_in()
-@use_args(ItemSchema(exclude=['id', 'create_date', 'user_id']))
-@marshal_with(JsonApiSchema())
-def create_item(item_data):
-    """
-    Create an item.
-
-    :param dict item_data: Dict with a subset of the Item fields.
+    :param dict event_data: Dict with a subset of the Event fields.
     :return: Status of the request. 200 if valid, 400 or 500 if not.
     :rtype: tuple[dict, int, dict]
     """
-    user_id = session['user_id']
-    location = item_data.get('location', None)
-    description = item_data.get('description', None)
-    name = item_data.get('name', None)
-    purchase_date = item_data.get('purchase_date', None)
-    purchase_price = item_data.get('purchase_price', None)
-    sell_date = item_data.get('sell_date', None)
-    sell_price = item_data.get('sell_price', None)
-    listed_price = item_data.get('listed_price', None)
+    device_id = session['device_id']
+    latitude = event_data.get('latitude', None)
+    longitude = event_data.get('longitude', None)
 
-    if name and ' ' in name:
-        return BAD_REQUEST_JSON_RESPONSE
-    APP.logger.info('Creating item %s', name)
+    APP.logger.info('Creating event at (%f,%f)', latitude, longitude)
     try:
-        item = Item(user_id=user_id,
-                    location=location,
-                    description=description,
-                    name=name,
-                    purchase_date=purchase_date,
-                    purchase_price=purchase_price,
-                    sell_date=sell_date,
-                    sell_price=sell_price,
-                    listed_price=listed_price
-                    )
-        DB.session.add(item)
+        account = Account.query.filter_by(device_id=device_id).first()
+        event = Event(account_id=account.id,
+                      latitude=latitude,
+                      longitude=longitude)
+        DB.session.add(event)
         DB.session.commit()
-        return ok_response('Added item {name}'.format(name=name))
+        return ok_response('Added event at (%f,%f)' % (latitude, longitude))
     except SQLAlchemyError as exception:
-        APP.logger.exception('Failed to create item %s: %s', name, exception)
+        APP.logger.exception('Failed to create event: %s', exception)
         return INTERNAL_SERVER_ERROR_JSON_RESPONSE
 
 
-@APP.route('/api/logout', methods=['GET', 'POST'])
-@marshal_with(JsonApiSchema())
-def logout():
-    """
-    Log out the requester.
-
-    :return: Status of the request. 200.
-    :rtype: tuple[dict, int, dict]
-    """
-    session.pop('username', None)
-    return ok_response('Logged out')
-
-
 @APP.route('/', methods=['GET'])
-def login_page():
-    """
-    Serve the vue index.
-
-    :return: The vue index page
-    :rtype: str
-    """
-    return send_from_directory('../public', 'index.html')
-
-
-@APP.route('/<path:path>', methods=['GET'])
-def catch_route(path):
-    """
-    Serve all other files.
-
-    :return: The vue index page
-    :rtype: str
-    """
-    return send_from_directory('../public', path)
+def health_check():
+    """Health check endpoint"""
+    return 'You know, for poppin'
 
 
 def main():
@@ -405,6 +197,7 @@ def main():
     args = parser.parse_args()
 
     APP.run(debug=True, host='0.0.0.0', port=args.port, use_reloader=False)
+
 
 if __name__ == '__main__':
     main()

@@ -1,3 +1,11 @@
 #!/bin/bash
 
+if [[ -z "${BASE_DIR}" ]];
+then
+  echo "You need to run"
+  printf "\tcd api && source setup.sh\n"
+  echo "to set up the pre-push hooks."
+  exit 1
+fi
+
 "${BASE_DIR}"/server/lint.sh

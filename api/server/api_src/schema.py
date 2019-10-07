@@ -36,6 +36,13 @@ class JsonApiSchema(DictSchema):
     msg = fields.Str()
 
 
+class AuthenticatedMessageSchema(DictSchema):
+    """
+    Schema for authenticated API requests
+    """
+    device_id = fields.Str()
+
+
 JSON_CT = {'Content-Type': 'application/json; charset=utf-8'}
 
 BAD_REQUEST_JSON_RESPONSE = {
