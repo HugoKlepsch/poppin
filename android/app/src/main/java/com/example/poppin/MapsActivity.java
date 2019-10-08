@@ -117,7 +117,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return accountId;
     }
 
-    
+
     private void loadAccountCredentials() {
         FileInputStream fIn;
         this.accountId = new byte[256];
