@@ -13,6 +13,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -24,12 +25,17 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, CreateEventFragment.OnInputListener, View.OnClickListener {
+import java.util.HashMap;
+import java.util.Map;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, CreateEventFragment.OnInputListener, View.OnClickListener, GoogleMap.OnMarkerClickListener {
 
     private static final String TAG = "MapsActivity";
     private GoogleMap mMap;
@@ -40,6 +46,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private FragmentManager mFragmentManager = getSupportFragmentManager();
 
+    public Map<Marker, EventModel> markerMap;
 
     /* Implementing the Interface between the fragment and this map activity
     *  Allows us to send data from the fragment to this activity
@@ -50,23 +57,58 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.e(TAG, "got the input: " + input);
         Toast.makeText(this, "Inputted:" + input, Toast.LENGTH_SHORT).show();
 
-
         try {
             if (mLocationPermissionsGranted) {
+
                 LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                 Criteria criteria = new Criteria();
                 Location currentLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+                Marker marker = createMarker(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), input);
 
-                MarkerOptions options = new MarkerOptions()
-                        .position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()))
-                        .title(input);
-                mMap.addMarker(options);
+                EventModel eventModel = new EventModel();
+                eventModel.title = input;
+
+                addEvent(marker, eventModel);
             }
         }catch (SecurityException e) {
             /* Permissions are not granted - get them*/
                 forcePermissionsRequest();
 
         }
+    }
+
+
+    public void addEvent(Marker marker, EventModel eventModel) {
+            markerMap.put(marker, eventModel);
+
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        //Get the model from the hashmap based on the clicked event
+            EventModel eventModel = markerMap.get(marker);
+
+            if (eventModel != null) {
+
+                Toast.makeText(this, "Clicked Event: " + eventModel.title, Toast.LENGTH_SHORT).show();
+
+                BottomSheetFragment bottomSheetFragment = new BottomSheetFragment();
+                bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
+
+            }
+
+        return true;
+
+    }
+
+    private Marker createMarker(LatLng latLng, String title) {
+        MarkerOptions options = new MarkerOptions()
+                .position(latLng)
+                .title(title)
+                .snippet("DESCRIPTION");
+        Marker marker =  mMap.addMarker(options);
+        marker.showInfoWindow();
+        return marker;
     }
 
 
@@ -84,6 +126,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         Log.d(TAG, "onMapReady: Maps are running with Full Permissions.");
         Toast.makeText(this, "Ready to Map things", Toast.LENGTH_SHORT).show();
+        mMap.setOnMarkerClickListener(this);
 
         if (mLocationPermissionsGranted) {
 
@@ -102,6 +145,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         //Maps is the MainView in this context.
         setContentView(R.layout.activity_maps);
+
+        markerMap = new HashMap<>();
+
 
         Log.d(TAG, "onCreate: Forcing Permission Check");
         /* Prior to starting the maps, make sure we have location services */
