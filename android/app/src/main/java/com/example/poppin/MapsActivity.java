@@ -22,7 +22,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Random;
-import org.json.JSONArray;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -30,8 +31,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private byte[] accountId;
     private String accountKeyStoragePath = "account_id";
-    private String mBaseAPIURL;
-    private RequestQueue requestQueue;
+    private String mBaseAPIURL = "";
 
 
     @Override
@@ -93,10 +93,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * @return
      */
     private void getEvents() {
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("AccountKey", this.accountId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.GET,
-                mBaseAPIURL + "/",
-                null,
+                mBaseAPIURL + "/events",
+                obj,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
