@@ -21,8 +21,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,12 +35,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String accountKeyStoragePath = "account_id";
     private String mBaseAPIURL = "";
 
+    private ArrayList<Event> events;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        this.events = new ArrayList<Event>();
         loadAccountCredentials();
+        getEvents();
 
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -47,6 +52,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
     }
 
+    /**
+     *
+     * @return
+     */
     private byte[] generateAccountCredentials() {
         byte[] accountId;
         Random r = new Random();
@@ -64,45 +73,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return accountId;
     }
 
-    
-    private void loadAccountCredentials() {
-        FileInputStream fIn;
-        this.accountId = new byte[256];
-
-        try {
-            byte[] bytes = new byte[256];
-            fIn = openFileInput(accountKeyStoragePath);
-            fIn.read(bytes);
-            System.arraycopy(bytes, 0, this.accountId, 0, 256);
-
-        } catch (FileNotFoundException e) {
-            byte[] bytes;
-            bytes = generateAccountCredentials();
-            System.arraycopy(bytes, 0, this.accountId, 0, 256);
-
-        } catch (IOException e) {
-            System.out.println(e.toString());
-        }
-
-        return;
-     }
-
 
     /**
      *
-     * @return
      */
-    private void getEvents() {
-        JSONObject obj = new JSONObject();
-        try {
-            obj.put("AccountKey", this.accountId);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    private void submitCredentialsForRegistration() {
+        JSONObject obj = ApplicationNetworkManager.getDefaultCredentialRequest(this.accountId);
 
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.GET,
-                mBaseAPIURL + "/events",
+                mBaseAPIURL + "/api/signup",
                 obj,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -118,7 +98,73 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
         );
 
-        ApplicationNetworkQueue.getInstance(this.getApplicationContext()).addToRequestQueue(request);
+        ApplicationNetworkManager.getInstance(this.getApplicationContext()).addToRequestQueue(request);
+
+        return;
+    }
+
+    /**
+     *
+     */
+    private void loadAccountCredentials() {
+        FileInputStream fIn;
+        this.accountId = new byte[256];
+
+        try {
+            byte[] bytes = new byte[256];
+            fIn = openFileInput(accountKeyStoragePath);
+            fIn.read(bytes);
+            System.arraycopy(bytes, 0, this.accountId, 0, 256);
+
+        } catch (FileNotFoundException e) {
+            byte[] bytes;
+            bytes = generateAccountCredentials();
+            System.arraycopy(bytes, 0, this.accountId, 0, 256);
+            submitCredentialsForRegistration();
+        } catch (IOException e) {
+            System.out.println(e.toString());
+        }
+
+        return;
+     }
+
+
+    /**
+     *
+     * @return
+     */
+    private void getEvents() {
+        JSONObject obj = ApplicationNetworkManager.getDefaultCredentialRequest(this.accountId);
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.GET,
+                mBaseAPIURL + "/api/events",
+                obj,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        JSONArray eventsArray;
+                        try {
+                            eventsArray = response.getJSONArray("events");
+
+                            for (int i = 0; i < eventsArray.length(); i++) {
+                                Event e = new Event((JSONObject) eventsArray.get(i));
+                                events.add(e);
+                            }
+                        } catch (JSONException e) {
+                            // ignore
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                }
+        );
+
+        ApplicationNetworkManager.getInstance(this.getApplicationContext()).addToRequestQueue(request);
 
         return; // explicit return
     }
