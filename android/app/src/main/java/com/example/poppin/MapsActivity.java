@@ -24,6 +24,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -47,7 +48,6 @@ import org.json.JSONObject;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, CreateEventFragment.OnInputListener, View.OnClickListener {
-
     private static final String TAG = "MapsActivity";
     private GoogleMap mMap;
 
@@ -58,6 +58,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     /* JULIANS WAY */
     private ArrayList<Event> events;
+
+    private Boolean mLocationPermissionsGranted = false;
+    private final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    private final float DEFAULT_ZOOM = 15f;
+
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private FragmentManager mFragmentManager = getSupportFragmentManager();
 
     private Boolean mLocationPermissionsGranted = false;
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
@@ -81,7 +88,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         /* Prior to starting the maps, make sure we have location services */
         forcePermissionsRequest();
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+       // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -89,7 +96,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Button createEventClick = (Button) findViewById(R.id.create_event);
 
         createEventClick.setOnClickListener(MapsActivity.this);
+    }
 
+
+    public void sendInput(String input) {
+        Log.e(TAG, "got the input: " + input);
+        Toast.makeText(this, "Inputted:" + input, Toast.LENGTH_SHORT).show();
+
+
+        try {
+            if (mLocationPermissionsGranted) {
+                LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                Criteria criteria = new Criteria();
+                Location currentLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+
+                MarkerOptions options = new MarkerOptions()
+                        .position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()))
+                        .title(input);
+                mMap.addMarker(options);
+            }
+        }catch (SecurityException e) {
+            /* Permissions are not granted - get them*/
+                forcePermissionsRequest();
+
+        }
+>>>>>>> 5f9515987f4d9eb9218f67d48396c62dd93446a8
     }
 
 
@@ -136,7 +167,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         return accountId;
     }
-
 
     /**
      *
