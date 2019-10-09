@@ -6,23 +6,39 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Singleton pattern class designed to preserve the network queue.
  * adapted from https://developer.android.com/training/volley/requestqueue#java
  */
-public class ApplicationNetworkQueue {
-    private static ApplicationNetworkQueue instance;
+public class ApplicationNetworkManager {
+    private static ApplicationNetworkManager instance;
     private RequestQueue requestQueue;
     private static Context applicationContext;
 
-    private ApplicationNetworkQueue(Context ctx) {
+    private ApplicationNetworkManager(Context ctx) {
         applicationContext = ctx;
         requestQueue = getRequestQueue();
     }
 
-    public static synchronized ApplicationNetworkQueue getInstance(Context context) {
+    public static JSONObject getDefaultCredentialRequest(byte[] accountID) {
+        JSONObject defaultObject;
+        defaultObject = new JSONObject();
+
+        try {
+            defaultObject.put("AccountID", accountID);
+        } catch (JSONException e) {
+            return null;
+        }
+
+        return defaultObject;
+    }
+
+    public static synchronized ApplicationNetworkManager getInstance(Context context) {
         if (instance == null) {
-            instance = new ApplicationNetworkQueue(context);
+            instance = new ApplicationNetworkManager(context);
         }
 
         return instance;
