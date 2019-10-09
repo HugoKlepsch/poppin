@@ -66,13 +66,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private FragmentManager mFragmentManager = getSupportFragmentManager();
 
-    private Boolean mLocationPermissionsGranted = false;
-    private final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
-    private final float DEFAULT_ZOOM = 15f;
-
-    private FusedLocationProviderClient mFusedLocationProviderClient;
-    private FragmentManager mFragmentManager = getSupportFragmentManager();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,29 +92,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    public void sendInput(String input) {
-        Log.e(TAG, "got the input: " + input);
-        Toast.makeText(this, "Inputted:" + input, Toast.LENGTH_SHORT).show();
-
-
-        try {
-            if (mLocationPermissionsGranted) {
-                LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                Criteria criteria = new Criteria();
-                Location currentLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
-
-                MarkerOptions options = new MarkerOptions()
-                        .position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()))
-                        .title(input);
-                mMap.addMarker(options);
-            }
-        }catch (SecurityException e) {
-            /* Permissions are not granted - get them*/
-                forcePermissionsRequest();
-
-        }
->>>>>>> 5f9515987f4d9eb9218f67d48396c62dd93446a8
-    }
 
 
     public void sendInput(String input) {
