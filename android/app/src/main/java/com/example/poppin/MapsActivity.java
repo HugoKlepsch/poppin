@@ -5,6 +5,11 @@ import androidx.fragment.app.FragmentActivity;
 import android.content.Context;
 import android.os.Bundle;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -18,11 +23,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private byte[] accountId;
     private String accountKeyStoragePath = "account_id";
+    private String mBaseAPIURL = "";
 
 
     @Override
@@ -77,6 +86,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         return;
      }
+
+
+    /**
+     *
+     * @return
+     */
+    private void getEvents() {
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("AccountKey", this.accountId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.GET,
+                mBaseAPIURL + "/events",
+                obj,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        // load all the events into the program
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                }
+        );
+
+        ApplicationNetworkQueue.getInstance(this.getApplicationContext()).addToRequestQueue(request);
+
+        return; // explicit return
+    }
+
 
     /**
      * Manipulates the map once available.
