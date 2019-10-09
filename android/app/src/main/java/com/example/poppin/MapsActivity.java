@@ -20,7 +20,6 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -142,7 +141,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      *
      */
     private void submitCredentialsForRegistration() {
-        JSONObject obj = ApplicationNetworkManager.getDefaultCredentialRequest(this.accountId);
+        JSONObject obj = ApplicationNetworkManager.getDefaultAuthenticatedRequest(this.accountId);
 
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.GET,
@@ -198,7 +197,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * @return
      */
     private void getEvents() {
-        JSONObject obj = ApplicationNetworkManager.getDefaultCredentialRequest(this.accountId);
+        JSONObject obj = ApplicationNetworkManager.getDefaultAuthenticatedRequest(this.accountId);
 
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.GET,

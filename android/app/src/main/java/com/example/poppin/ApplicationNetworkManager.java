@@ -23,12 +23,12 @@ public class ApplicationNetworkManager {
         requestQueue = getRequestQueue();
     }
 
-    public static JSONObject getDefaultCredentialRequest(byte[] accountID) {
+    public static JSONObject getDefaultAuthenticatedRequest(byte[] accountID) {
         JSONObject defaultObject;
         defaultObject = new JSONObject();
 
         try {
-            defaultObject.put("AccountID", accountID);
+            defaultObject.put("device_key", accountID);
         } catch (JSONException e) {
             return null;
         }
