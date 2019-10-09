@@ -40,7 +40,7 @@ class AuthenticatedMessageSchema(DictSchema):
     """
     Schema for authenticated API requests
     """
-    device_id = fields.Str()
+    device_key = fields.Str()
 
 
 JSON_CT = {'Content-Type': 'application/json; charset=utf-8'}
