@@ -11,7 +11,7 @@ class Account(DB.Model):
     """Account database model"""
     __tablename__ = 'accounts'
     id = DB.Column(DB.Integer, nullable=False, autoincrement=True, primary_key=True)
-    device_id = DB.Column(DB.String(120), nullable=False)
+    device_key = DB.Column(DB.String(120), nullable=False)
 
 
 class Event(DB.Model):
@@ -29,6 +29,14 @@ class EventSchemaIn(AuthenticatedMessageSchema):
     longitude = fields.Float()
 
 
+# TODO I don't like putting these schemas here, but I don't have a better place for them yet.
+class EventQueryByLocationSchema(AuthenticatedMessageSchema):
+    """Event marshmallow schema"""
+    latitude = fields.Float()
+    longitude = fields.Float()
+    search_radius_meters = fields.Float()
+
+
 class EventSchemaOut(JsonApiSchema):
     """Event marshmallow schema"""
     id = fields.Integer()
@@ -40,4 +48,4 @@ class EventSchemaOut(JsonApiSchema):
 class AccountSchemaOut(JsonApiSchema):
     """Account marshmallow schema"""
     id = fields.Integer()
-    device_id = fields.String()
+    device_key = fields.String()

@@ -2,17 +2,21 @@
 import argparse
 from functools import wraps
 import logging
+from math import cos
 import os
 
-from flask import Flask, session
+from flask import Flask
 from flask.logging import create_logger
 from flask_apispec import marshal_with
+from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 from webargs.flaskparser import use_args
 
 from api_src.db import DB
 from api_src.models import Account, Event
-from api_src.models import AccountSchemaOut, EventSchemaIn, EventSchemaOut, AuthenticatedMessageSchema
+from api_src.models import AccountSchemaOut
+from api_src.models import EventSchemaIn, EventSchemaOut, EventQueryByLocationSchema
+from api_src.models import AuthenticatedMessageSchema
 from api_src.schema import JSON_CT, INTERNAL_SERVER_ERROR_JSON_RESPONSE, ok_response
 from api_src.schema import JsonApiSchema
 
@@ -57,10 +61,10 @@ def setup_database(_app):  # {{{
         DB.session.commit()
         _app.logger.info('Created databases')
 
-        example_account = Account.query.filter_by(device_id='testaccount').first()
+        example_account = Account.query.filter_by(device_key='testaccount').first()
         if example_account is None:
             _app.logger.info('Creating test account')
-            example_account = Account(device_id='testaccount')
+            example_account = Account(device_key='testaccount')
             DB.session.add(example_account)
             DB.session.commit()
 
@@ -87,15 +91,15 @@ def is_authenticated(payload, as_device=None):
     """
     Check if the requester is authenticated
 
-    :param dict payload: Payload loaded from request. Key 'device_id' should exist
-    :param str as_device: Optional device_id the requester should be authenticated as
+    :param dict payload: Payload loaded from request. Key 'device_key' should exist
+    :param str as_device: Optional device_key the requester should be authenticated as
     :return: Is the requester authenticated
     :rtype: bool
     """
-    if 'device_id' in payload:
-        device_id = payload['device_id']
-        return (Account.query.filter_by(device_id=device_id).first() is not None) and \
-               (as_device is None or device_id == as_device)
+    if 'device_key' in payload:
+        device_key = payload['device_key']
+        return (Account.query.filter_by(device_key=device_key).first() is not None) and \
+               (as_device is None or device_key == as_device)
     return False
 
 
@@ -103,7 +107,7 @@ def authenticated(as_device=None):
     """
     Decorator to ensure a user is authenticated before calling decorated function.
 
-    :param str as_device: Optional device_id the requester should be authenticated as
+    :param str as_device: Optional device_key the requester should be authenticated as
     :return: The decorated function
     :rtype: funct
     """
@@ -136,19 +140,56 @@ def all_accounts(_payload):
     return Account.query.all()
 
 
-@APP.route('/api/events', methods=['GET'])
+@APP.route('/api/events/by_location', methods=['GET'])
+@use_args(EventQueryByLocationSchema())
+@authenticated()
+@marshal_with(EventSchemaOut(many=True))
+def events_for_area(payload):
+    """
+    Get all events in an area.
+
+    :return: All events in the given area
+    :rtype: list[EventSchemaOut]
+    """
+    try:
+        latitude = float(payload['latitude'])
+        longitude = float(payload['longitude'])
+        search_radius_meters = float(payload['search_radius_meters'])
+    except (KeyError, ValueError):
+        return [{'msg': 'Bad request'}], 400, JSON_CT
+
+    # How to convert meters to lat/lon degrees.
+    # https://gis.stackexchange.com/a/2964
+    # This isn't perfect, and gets worse near the poles, but it's good enough for where people live
+    latitude_range_diff = search_radius_meters / 111111.1
+    longitude_range_diff = search_radius_meters / (111111.1 * cos(latitude))
+    return Event.query.filter(
+        and_(
+            and_(
+                Event.latitude >= latitude - latitude_range_diff,
+                Event.latitude < latitude + latitude_range_diff
+            ),
+            and_(
+                Event.longitude >= longitude - longitude_range_diff,
+                Event.longitude < longitude + longitude_range_diff
+            )
+        )
+    ).all() or []
+
+
+@APP.route('/api/events/by_device_key', methods=['GET'])
 @use_args(AuthenticatedMessageSchema())
 @authenticated()
 @marshal_with(EventSchemaOut(many=True))
-def events(payload):
+def events_for_account_id(payload):
     """
-    Get all items for the authenticated user. TODO this is a bad API interface
+    Get all events for the authenticated user.
 
-    :return: All items for the logged in user.
-    :rtype: list[Item]
+    :return: All events for the logged in user.
+    :rtype: list[EventSchemaOut]
     """
-    device_id = payload['device_id'] or ''
-    account = Account.query.filter_by(device_id=device_id).first()
+    device_key = payload['device_key'] or ''
+    account = Account.query.filter_by(device_key=device_key).first()
     if account:
         return Event.query.filter_by(account_id=account.id).all() or []
     return []
@@ -166,13 +207,13 @@ def create_event(event_data):
     :return: Status of the request. 200 if valid, 400 or 500 if not.
     :rtype: tuple[dict, int, dict]
     """
-    device_id = session['device_id']
+    device_key = event_data.get('device_key', None)
     latitude = event_data.get('latitude', None)
     longitude = event_data.get('longitude', None)
 
     APP.logger.info('Creating event at (%f,%f)', latitude, longitude)
     try:
-        account = Account.query.filter_by(device_id=device_id).first()
+        account = Account.query.filter_by(device_key=device_key).first()
         event = Event(account_id=account.id,
                       latitude=latitude,
                       longitude=longitude)
