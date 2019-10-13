@@ -72,11 +72,14 @@ def setup_database(_app):  # {{{
         example_event = Event.query.filter_by(account_id=example_account.id).first()
         if example_event is None:
             _app.logger.info('Creating test event')
-            example_event = Event(account_id=example_account.id, latitude=32.079663, longitude=34.775528, time=datetime.datetime.now().isoformat())
+            example_event = Event(account_id=example_account.id, latitude=32.079663, longitude=34.775528, \
+                    time=datetime.datetime.now().isoformat())
             DB.session.add(example_event)
-            example_event_two = Event(account_id=example_account.id, latitude=43.545199, longitude=-80.246926, time=datetime.datetime.now().isoformat())
+            example_event_two = Event(account_id=example_account.id, latitude=43.545199, longitude=-80.246926, \
+                    time=datetime.datetime.now().isoformat())
             DB.session.add(example_event_two)
-            example_event_three = Event(account_id=example_account.id, latitude=43.530793, longitude=-80.229077, time=datetime.datetime.now().isoformat())
+            example_event_three = Event(account_id=example_account.id, latitude=43.530793, longitude=-80.229077, \
+                    time=datetime.datetime.now().isoformat())
             DB.session.add(example_event_three)
             DB.session.commit()
 

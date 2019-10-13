@@ -21,7 +21,7 @@ class Event(DB.Model):
     latitude = DB.Column(DB.Float(precision=32, asdecimal=True), nullable=False)
     longitude = DB.Column(DB.Float(precision=32, asdecimal=True), nullable=False)
     account_id = DB.Column(DB.Integer, DB.ForeignKey(Account.__tablename__ + '.id'), nullable=False)
-    time = DB.Column(DB.Column(DB.String, nullable=False))
+    time = DB.Column(DB.String, nullable=False)
 
 
 class EventSchemaIn(AuthenticatedMessageSchema):
