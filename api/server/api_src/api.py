@@ -4,6 +4,7 @@ from functools import wraps
 import logging
 from math import cos
 import os
+import datetime
 
 from flask import Flask
 from flask.logging import create_logger
@@ -71,11 +72,11 @@ def setup_database(_app):  # {{{
         example_event = Event.query.filter_by(account_id=example_account.id).first()
         if example_event is None:
             _app.logger.info('Creating test event')
-            example_event = Event(account_id=example_account.id, latitude=32.079663, longitude=34.775528)
+            example_event = Event(account_id=example_account.id, latitude=32.079663, longitude=34.775528, time=datetime.datetime.now().isoformat())
             DB.session.add(example_event)
-            example_event_two = Event(account_id=example_account.id, latitude=43.545199, longitude=-80.246926)
+            example_event_two = Event(account_id=example_account.id, latitude=43.545199, longitude=-80.246926, time=datetime.datetime.now().isoformat())
             DB.session.add(example_event_two)
-            example_event_three = Event(account_id=example_account.id, latitude=43.530793, longitude=-80.229077)
+            example_event_three = Event(account_id=example_account.id, latitude=43.530793, longitude=-80.229077, time=datetime.datetime.now().isoformat())
             DB.session.add(example_event_three)
             DB.session.commit()
 
@@ -216,13 +217,15 @@ def create_event(event_data):
     device_key = event_data.get('device_key', None)
     latitude = event_data.get('latitude', None)
     longitude = event_data.get('longitude', None)
+    time = event_data.get('time', None)
 
     APP.logger.info('Creating event at (%f,%f)', latitude, longitude)
     try:
         account = Account.query.filter_by(device_key=device_key).first()
         event = Event(account_id=account.id,
                       latitude=latitude,
-                      longitude=longitude)
+                      longitude=longitude,
+                      time=time)
         DB.session.add(event)
         DB.session.commit()
         return ok_response('Added event at (%f,%f)' % (latitude, longitude))
