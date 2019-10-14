@@ -117,7 +117,13 @@ def authenticated(as_device=None):
             # just do here everything what you need
 
             if not is_authenticated(payload=payload, as_device=as_device):
-                return {'msg': 'Not authenticated'}, 401, JSON_CT
+                # TODO add the token auth
+                if payload['device_key']:
+                    account = Account(device_key=payload['device_key'])
+                    DB.session.add(account)
+                    DB.session.commit()
+                else:
+                    return {'msg': 'Not authenticated'}, 401, JSON_CT
 
             result = function(payload, *args, **kwargs)
 
