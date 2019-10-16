@@ -21,12 +21,14 @@ class Event(DB.Model):
     latitude = DB.Column(DB.Float(precision=32, asdecimal=True), nullable=False)
     longitude = DB.Column(DB.Float(precision=32, asdecimal=True), nullable=False)
     account_id = DB.Column(DB.Integer, DB.ForeignKey(Account.__tablename__ + '.id'), nullable=False)
+    time = DB.Column(DB.String, nullable=False)
 
 
 class EventSchemaIn(AuthenticatedMessageSchema):
     """Event marshmallow schema"""
     latitude = fields.Float()
     longitude = fields.Float()
+    time = fields.String()
 
 
 # TODO I don't like putting these schemas here, but I don't have a better place for them yet.
@@ -43,6 +45,7 @@ class EventSchemaOut(JsonApiSchema):
     latitude = fields.Float()
     longitude = fields.Float()
     account_id = fields.Integer()
+    time = fields.String()
 
 
 class AccountSchemaOut(JsonApiSchema):

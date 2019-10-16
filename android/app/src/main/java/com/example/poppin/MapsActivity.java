@@ -59,7 +59,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private byte[] accountId;
     private String accountKeyStoragePath = "account_id";
-    private String mBaseAPIURL = "";
+    private String mBaseAPIURL = "10.0.2.2:1221";
 
 
     /* JULIANS WAY */
