@@ -8,13 +8,11 @@ import androidx.fragment.app.FragmentManager;
 
 import android.content.Context;
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.EventLog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -31,7 +29,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -263,9 +260,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 Toast.makeText(this, "Clicked Event: " + event.getName(), Toast.LENGTH_SHORT).show();
 
-                BottomSheetFragment bottomSheetFragment = new BottomSheetFragment();
-                bottomSheetFragment.setArguments(bundle);
-                bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
+                ViewEventBottomSheetFragment viewEventBottomSheetFragment = new ViewEventBottomSheetFragment();
+                viewEventBottomSheetFragment.setArguments(bundle);
+                viewEventBottomSheetFragment.show(getSupportFragmentManager(), viewEventBottomSheetFragment.getTag());
 
             }
 
