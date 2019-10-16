@@ -255,11 +255,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //Get the model from the hashmap based on the clicked event
             Event event = markerMap.get(marker);
 
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("Event", event);
+
+
             if (event != null) {
 
                 Toast.makeText(this, "Clicked Event: " + event.getName(), Toast.LENGTH_SHORT).show();
 
                 BottomSheetFragment bottomSheetFragment = new BottomSheetFragment();
+                bottomSheetFragment.setArguments(bundle);
                 bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
 
             }
