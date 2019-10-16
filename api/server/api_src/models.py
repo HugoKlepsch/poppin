@@ -32,9 +32,10 @@ class EventSchemaIn(AuthenticatedMessageSchema):
 # TODO I don't like putting these schemas here, but I don't have a better place for them yet.
 class EventQueryByLocationSchema(AuthenticatedMessageSchema):
     """Event marshmallow schema"""
-    latitude = fields.Float()
-    longitude = fields.Float()
-    search_radius_meters = fields.Float()
+    latitude_northeast = fields.Float()
+    longitude_northeast = fields.Float()
+    latitude_southwest = fields.Float()
+    longitude_southwest = fields.Float()
 
 
 class EventSchemaOut(JsonApiSchema):

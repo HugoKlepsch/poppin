@@ -1,0 +1,216 @@
+{
+	"info": {
+		"_postman_id": "3171a5d0-d763-4ada-935b-f08389964d0b",
+		"name": "poppin",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "health check",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"location_id\": 1,\n\t\"description\": \"Item description\",\n\t\"name\": \"item name\",\n\t\"listed_price\": \"123.0000000000000000000\",\n\t\"purchase_date\": \"2019-07-28T19:00:21.478300+00:00\",\n\t\"purchase_price\": \"1.0000000000000000000\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:1221/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1221",
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/events/by_device_key",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"device_key\": \"testaccount\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:1221/api/events/by_device_key",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1221",
+					"path": [
+						"api",
+						"events",
+						"by_device_key"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/events/by_location isreal",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"device_key\": \"testaccount\",\n\t\"latitude\": 32.079663,\n\t\"longitude\": 34.775528,\n\t\"search_radius_meters\": 5000\n}"
+				},
+				"url": {
+					"raw": "http://localhost:1221/api/events/by_location",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1221",
+					"path": [
+						"api",
+						"events",
+						"by_location"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/events/by_location Guelph small",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"device_key\": \"testaccount\",\n\t\"latitude\": 43.545199, \n\t\"longitude\": -80.246926,\n\t\"search_radius_meters\": 500\n}"
+				},
+				"url": {
+					"raw": "http://localhost:1221/api/events/by_location",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1221",
+					"path": [
+						"api",
+						"events",
+						"by_location"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/events/by_location Guelph large",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"device_key\": \"testaccount\",\n\t\"latitude\": 43.545199, \n\t\"longitude\": -80.246926,\n\t\"search_radius_meters\": 500\n}"
+				},
+				"url": {
+					"raw": "http://localhost:1221/api/events/by_location",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1221",
+					"path": [
+						"api",
+						"events",
+						"by_location"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/all_accounts",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"device_key\": \"testaccount\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:1221/api/all_accounts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1221",
+					"path": [
+						"api",
+						"all_accounts"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

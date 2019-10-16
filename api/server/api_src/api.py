@@ -2,7 +2,6 @@
 import argparse
 from functools import wraps
 import logging
-from math import cos
 import os
 
 from flask import Flask
@@ -158,26 +157,22 @@ def events_for_area(payload):
     :rtype: list[EventSchemaOut]
     """
     try:
-        latitude = float(payload['latitude'])
-        longitude = float(payload['longitude'])
-        search_radius_meters = float(payload['search_radius_meters'])
+        latitude_ne = float(payload['latitude_northeast'])
+        longitude_ne = float(payload['longitude_northeast'])
+        latitude_sw = float(payload['latitude_southwest'])
+        longitude_sw = float(payload['longitude_southwest'])
     except (KeyError, ValueError):
         return [{'msg': 'Bad request'}], 400, JSON_CT
 
-    # How to convert meters to lat/lon degrees.
-    # https://gis.stackexchange.com/a/2964
-    # This isn't perfect, and gets worse near the poles, but it's good enough for where people live
-    latitude_range_diff = search_radius_meters / 111111.1
-    longitude_range_diff = search_radius_meters / (111111.1 * cos(latitude))
     return Event.query.filter(
         and_(
             and_(
-                Event.latitude >= latitude - latitude_range_diff,
-                Event.latitude < latitude + latitude_range_diff
+                Event.latitude >= latitude_sw,
+                Event.latitude < latitude_ne
             ),
             and_(
-                Event.longitude >= longitude - longitude_range_diff,
-                Event.longitude < longitude + longitude_range_diff
+                Event.longitude >= longitude_sw,
+                Event.longitude < longitude_ne
             )
         )
     ).all() or []
