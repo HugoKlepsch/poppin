@@ -6,76 +6,53 @@
     android:layout_height="wrap_content"
     android:background="#ffffff"
     android:orientation="vertical"
-    android:padding="18dp"
-    android:paddingHorizontal="20dp"
+    android:padding="12dp"
     app:behavior_hideable="false"
     app:behavior_peekHeight="100dp"
     app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="96dp"
         android:orientation="horizontal">
+
+
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.90"
+            android:layout_weight="5"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/event_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Event"
+                android:text="Event Title"
                 android:textColor="#000000"
-                android:textSize="32dp"
+                android:textSize="24sp"
                 android:textStyle="bold" />
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_weight="0.10">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="6dp">
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/fire"/>
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/hotness"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hype Rating HOT"
+                    android:textColor="@color/colorAccent" />
+
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
-                    android:text="HOT"
-                    android:textColor="@color/colorAccent"/>
+                    android:text=" From 51 Users"
+                    android:textColor="@color/colorAccent" />
 
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/person"/>
-
-                <TextView
-                    android:id="@+id/checkins"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="8dp"
-                    android:text="51"
-                    android:textColor="@color/colorPrimaryDark" />
             </LinearLayout>
 
 
@@ -106,66 +83,45 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_margin="6dp"
         android:drawablePadding="16dp"
         android:text="Location" />
 
     <TextView
-        android:id="@+id/category"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:drawablePadding="16dp"
-        android:text="Category" />
+        android:layout_margin="6dp"
 
-    <TextView
-        android:id="@+id/time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
         android:drawablePadding="16dp"
-        android:text="10:30pm" />
-
+        android:text="Wed, 10 AM - 9 PM" />
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:id="@+id/description"
-            android:layout_marginVertical="12dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Description"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="96dp"
         android:orientation="horizontal">
 
+
+
         <Button
-            android:layout_marginVertical="6dp"
-            android:layout_marginRight="6dp"
+            android:layout_margin="6dp"
+
             android:layout_weight="1"
             android:id="@+id/button1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
-            android:text="Directions"/>
-
+            android:text="Directions" />
         <Button
-            android:layout_marginVertical="6dp"
-            android:layout_marginLeft="6dp"
+            android:layout_margin="6dp"
+
             android:layout_weight="1"
             android:id="@+id/button2"
             android:layout_width="0dp"
             android:background="@color/colorAccent"
             android:layout_height="wrap_content"
             android:text="Check in" />
+
 
     </LinearLayout>
 
