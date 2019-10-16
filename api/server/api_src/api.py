@@ -71,14 +71,18 @@ def setup_database(_app):  # {{{
         example_event = Event.query.filter_by(account_id=example_account.id).first()
         if example_event is None:
             _app.logger.info('Creating test event')
-            example_event = Event(account_id=example_account.id, latitude=32.079663, longitude=34.775528, \
-                    time=datetime.datetime.now().isoformat())
+
+            example_event = Event(account_id=example_account.id, latitude=32.079663, longitude=34.775528,
+                                  group_size_max=3, group_size_min=1, title="Event 1",
+                                  time=datetime.datetime.now().isoformat())
             DB.session.add(example_event)
-            example_event_two = Event(account_id=example_account.id, latitude=43.545199, longitude=-80.246926, \
-                    time=datetime.datetime.now().isoformat())
+            example_event_two = Event(account_id=example_account.id, latitude=43.545199, longitude=-80.246926,
+                                      group_size_max=5, group_size_min=3, title="Event 2",
+                                      time=datetime.datetime.now().isoformat())
             DB.session.add(example_event_two)
-            example_event_three = Event(account_id=example_account.id, latitude=43.530793, longitude=-80.229077, \
-                    time=datetime.datetime.now().isoformat())
+            example_event_three = Event(account_id=example_account.id, latitude=43.530793, longitude=-80.229077,
+                                        group_size_max=1, group_size_min=1, title="Event 3",
+                                        time=datetime.datetime.now().isoformat())
             DB.session.add(example_event_three)
             DB.session.commit()
 
@@ -217,13 +221,24 @@ def create_event(event_data):
     longitude = event_data.get('longitude', None)
     time = event_data.get('time', None)
 
+    group_size_min = event_data.get('group_size_min', None)
+    group_size_max = event_data.get('group_size_max', None)
+    title = event_data.get('title', None)
+
+
+
+
     APP.logger.info('Creating event at (%f,%f)', latitude, longitude)
     try:
         account = Account.query.filter_by(device_key=device_key).first()
         event = Event(account_id=account.id,
                       latitude=latitude,
                       longitude=longitude,
-                      time=time)
+                      time=time,
+                      group_size_max=group_size_max,
+                      group_size_min=group_size_min,
+                      title=title)
+
         DB.session.add(event)
         DB.session.commit()
         return ok_response('Added event at (%f,%f)' % (latitude, longitude))

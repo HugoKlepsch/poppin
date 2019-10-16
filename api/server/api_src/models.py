@@ -22,14 +22,18 @@ class Event(DB.Model):
     longitude = DB.Column(DB.Float(precision=32, asdecimal=True), nullable=False)
     account_id = DB.Column(DB.Integer, DB.ForeignKey(Account.__tablename__ + '.id'), nullable=False)
     time = DB.Column(DB.String, nullable=False)
-
+    group_size_max = DB.Column(DB.Integer, nullable=False)
+    group_size_min = DB.Column(DB.Integer, nullable=False)
+    title = DB.Column(DB.String(200), nullable=False)
 
 class EventSchemaIn(AuthenticatedMessageSchema):
     """Event marshmallow schema"""
     latitude = fields.Float()
     longitude = fields.Float()
     time = fields.String()
-
+    group_size_max = fields.Integer()
+    group_size_min = fields.Integer()
+    title = fields.String()
 
 # TODO I don't like putting these schemas here, but I don't have a better place for them yet.
 class EventQueryByLocationSchema(AuthenticatedMessageSchema):
@@ -47,6 +51,9 @@ class EventSchemaOut(JsonApiSchema):
     longitude = fields.Float()
     account_id = fields.Integer()
     time = fields.String()
+    group_size_max = fields.Integer()
+    group_size_min = fields.Integer()
+    title = fields.String()
 
 
 class AccountSchemaOut(JsonApiSchema):
