@@ -3,7 +3,9 @@ package com.example.poppin;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Event {
+import java.io.Serializable;
+
+public class Event implements Serializable {
     private double latitude;
     private double longitude;
     private String name;
@@ -164,6 +166,8 @@ public class Event {
     public void setCheckins(int checkins) {
         this.checkins = checkins;
     }
+
+
 
     /**
      *
