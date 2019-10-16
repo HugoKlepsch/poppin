@@ -26,11 +26,12 @@ public class Event implements Serializable {
     private Date time;
     private String title;
     private String description;
+    private int recommendedGroupSizeMin;
+    private int recommendedGroupSizeMax;
     private String category;
 
     final static private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");;
-    private int recommendedGroupSizeMin;
-    private int recommendedGroupSizeMax;
+
     private int checkins;
     private int hype;
 
@@ -97,12 +98,10 @@ public class Event implements Serializable {
             json.put("checkins", checkins);
             json.put("hype", hype);
             json.put("hotness", hotness);
-            json.put("recommendedGroupSizeMax", recommendedGroupSizeMax);
-            json.put("recommendedGroupSizeMin", recommendedGroupSizeMin);
+            json.put("group_size_max", recommendedGroupSizeMax);
+            json.put("group_size_min", recommendedGroupSizeMin);
 
         } catch (JSONException e) {
-
-
             e.printStackTrace();
             return null;
         }
@@ -122,8 +121,8 @@ public class Event implements Serializable {
         serialJson += "\"title\":" + "\"" + title + "\",";
         serialJson += "\"description\":" + "\"" + description + "\",";
         serialJson += "\"checkins\":" + "\"" + checkins + "\",";
-        serialJson += "\"recommendedGroupSizeMax\":" + "\"" + recommendedGroupSizeMax + "\",";
-        serialJson += "\"recommendedGroupSizeMin\":" + "\"" + recommendedGroupSizeMin + "\",";
+        serialJson += "\"group_size_max\":" + "\"" + recommendedGroupSizeMax + "\",";
+        serialJson += "\"group_size_min\":" + "\"" + recommendedGroupSizeMin + "\",";
         serialJson += "\"hype\":" + "\"" + hype + "\"}";
 
         return serialJson;
@@ -131,6 +130,7 @@ public class Event implements Serializable {
 
 
     /**
+     *
      * @return
      */
     public double getLatitude() {
@@ -138,6 +138,7 @@ public class Event implements Serializable {
     }
 
     /**
+     *
      * @param latitude
      */
     public void setLatitude(double latitude) {
@@ -145,6 +146,7 @@ public class Event implements Serializable {
     }
 
     /**
+     *
      * @return
      */
     public double getLongitude() {
@@ -152,6 +154,7 @@ public class Event implements Serializable {
     }
 
     /**
+     *
      * @param longitude
      */
     public void setLongitude(double longitude) {
@@ -159,6 +162,7 @@ public class Event implements Serializable {
     }
 
     /**
+     *
      * @return
      */
     public String getTitle() {
@@ -174,6 +178,7 @@ public class Event implements Serializable {
     }
 
     /**
+     *
      * @return
      */
     public String getDescription() {
@@ -181,6 +186,7 @@ public class Event implements Serializable {
     }
 
     /**
+     *
      * @param description
      */
     public void setDescription(String description) {
@@ -211,11 +217,13 @@ public class Event implements Serializable {
     }
 
     /**
+     *
      * @param checkins
      */
     public void setCheckins(int checkins) {
         this.checkins = checkins;
     }
+
 
     /**
      *
@@ -257,6 +265,7 @@ public class Event implements Serializable {
     }
 
     /**
+     *
      * @param hype
      */
     public void setHype(int hype) {
@@ -308,7 +317,5 @@ public class Event implements Serializable {
     public int getRecommendedGroupSizeMax() {
         return recommendedGroupSizeMax;
     }
-
-
 
 }

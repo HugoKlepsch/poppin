@@ -1,6 +1,5 @@
 package com.example.poppin;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,23 +9,14 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
-import java.time.temporal.TemporalField;
-import java.util.Date;
-
-
 public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
 
-    private TextView txtTitle;
-    private TextView txtGroupSize;
-    private ImageView imgGroupSize;
-    private TextView titleView;
-    private TextView categoryView;
-    private TextView timeView;
-    private TextView descriptionView;
+    TextView txtTitle;
+    TextView txtGroupSize;
+    ImageView imgGroupSize;
 
 
     public ViewEventBottomSheetFragment() {
@@ -41,30 +31,23 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Bundle bundle = this.getArguments();
 
         Event event = (Event)bundle.getSerializable("Event");
-        titleView = view.findViewById(R.id.event_title);
-        titleView.setText(event.getTitle());
+        txtTitle = view.findViewById(R.id.event_title);
+        txtTitle.setText(event.getTitle());
 
-        timeView = view.findViewById(R.id.time);
-        timeView.setText(event.getLocalTime());
-
-        categoryView = view.findViewById(R.id.category);
-        categoryView.setText(event.getCategory());
-
-        descriptionView = view.findViewById(R.id.description);
-        descriptionView.setText(event.getDescription());
 
         txtGroupSize = view.findViewById(R.id.txtGroupSize);
         String groupSizeDialog = String.format("Recommended Group Size: (%d - %d)", event.getRecommendedGroupSizeMin(), event.getRecommendedGroupSizeMax());
         txtGroupSize.setText(groupSizeDialog);
 
+
         imgGroupSize = view.findViewById(R.id.imgGroupIcon);
         imgGroupSize.setImageResource(R.drawable.ic_group);
+
 
         super.onViewCreated(view, savedInstanceState);
     }
