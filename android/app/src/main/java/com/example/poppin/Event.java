@@ -44,6 +44,7 @@ public class Event implements Serializable {
         this.description = (String) jsonObj.optString("description");
         this.checkins = (Integer) jsonObj.optInt("checkins");
         this.hype = (Integer) jsonObj.optInt("hype");
+        this.hotness = (Double) jsonObj.optDouble("hotness");
     }
 
     /**
@@ -62,6 +63,7 @@ public class Event implements Serializable {
             json.put("description", description);
             json.put("checkins", checkins);
             json.put("hype", hype);
+            json.put("hotness", hotness);
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -83,6 +85,7 @@ public class Event implements Serializable {
         serialJson += "\"title\":" + "\"" + name + "\",";
         serialJson += "\"description\":" + "\"" + description + "\",";
         serialJson += "\"checkins\":" + "\"" + checkins + "\",";
+        serialJson += "\"hotness\":" + "\"" + hotness + "\",";
         serialJson += "\"hype\":" + "\"" + hype + "\"}";
 
         return serialJson;
