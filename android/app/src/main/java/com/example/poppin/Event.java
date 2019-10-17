@@ -14,6 +14,8 @@ public class Event implements Serializable {
     private int checkins;
     private int hype;
 
+    private double hotness;
+
     /**
      *
      * @param lat
@@ -38,10 +40,11 @@ public class Event implements Serializable {
     public Event(JSONObject jsonObj) throws JSONException {
         this.latitude = (Double) jsonObj.get("latitude");
         this.longitude = (Double) jsonObj.get("longitude");
-        this.name = (String) jsonObj.get("name");
-        this.description = (String) jsonObj.get("description");
-        this.checkins = (Integer) jsonObj.get("checkins");
-        this.hype = (Integer) jsonObj.get("hype");
+        this.name = (String) jsonObj.optString("title");
+        this.description = (String) jsonObj.optString("description");
+        this.checkins = (Integer) jsonObj.optInt("checkins");
+        this.hype = (Integer) jsonObj.optInt("hype");
+        this.hotness = (Double) jsonObj.optDouble("hotness");
     }
 
     /**
@@ -56,10 +59,11 @@ public class Event implements Serializable {
         try {
             json.put("latitude", latitude);
             json.put("longitude", longitude);
-            json.put("name", name);
+            json.put("title", name);
             json.put("description", description);
             json.put("checkins", checkins);
             json.put("hype", hype);
+            json.put("hotness", hotness);
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -78,9 +82,10 @@ public class Event implements Serializable {
 
         serialJson += "\"latitude\":" + "\"" + latitude + "\",";
         serialJson += "\"longitude\":" + "\"" + longitude + "\",";
-        serialJson += "\"name\":" + "\"" + name + "\",";
+        serialJson += "\"title\":" + "\"" + name + "\",";
         serialJson += "\"description\":" + "\"" + description + "\",";
         serialJson += "\"checkins\":" + "\"" + checkins + "\",";
+        serialJson += "\"hotness\":" + "\"" + hotness + "\",";
         serialJson += "\"hype\":" + "\"" + hype + "\"}";
 
         return serialJson;
@@ -183,5 +188,21 @@ public class Event implements Serializable {
      */
     public void setHype(int hype) {
         this.hype = hype;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public double getHotness() {
+        return hotness;
+    }
+
+    /**
+     *
+     * @param hotness
+     */
+    public void setHotness(double hotness) {
+        this.hotness = hotness;
     }
 }
