@@ -139,6 +139,28 @@ def authenticated(as_device=None):
     return _authenticated
 
 
+def calculate_event_hotness(event):
+    """
+    Calculate the hotness of an event, and add it as the `hotness` field on the event.
+
+    :param Union[Event,Iterable(Event)] event: the event to calculate hotness for
+    :return: The given event, with new `hotness` field containing the hotness
+    :rtype: Event
+    """
+
+    def _calculate_event_hotness(event):
+        # TODO actually calculate things like sqrt(event.checkins) + 0.4sqrt(event.hypes)
+        _event = event  # TODO
+        return 5.0
+
+    if isinstance(event, list):
+        for element in event:
+            element.hotness = _calculate_event_hotness(element)
+    else:
+        event.hotness = _calculate_event_hotness(event)
+    return event
+
+
 @APP.route('/api/all_accounts', methods=['GET'])
 @use_args(AuthenticatedMessageSchema())
 @authenticated(as_device='testaccount')  # TODO create admin account
@@ -172,7 +194,7 @@ def events_for_area(payload):
     except (KeyError, ValueError):
         return [{'msg': 'Bad request'}], 400, JSON_CT
 
-    return Event.query.filter(
+    return calculate_event_hotness(Event.query.filter(
         and_(
             and_(
                 Event.latitude >= latitude_sw,
@@ -183,7 +205,7 @@ def events_for_area(payload):
                 Event.longitude < longitude_ne
             )
         )
-    ).all() or []
+    ).all() or [])
 
 
 @APP.route('/api/events/by_device_key', methods=['GET'])
@@ -200,7 +222,7 @@ def events_for_account_id(payload):
     device_key = payload['device_key'] or ''
     account = Account.query.filter_by(device_key=device_key).first()
     if account:
-        return Event.query.filter_by(account_id=account.id).all() or []
+        return calculate_event_hotness(Event.query.filter_by(account_id=account.id).all() or [])
     return []
 
 

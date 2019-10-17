@@ -90,7 +90,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"device_key\": \"testaccount\",\n\t\"latitude\": 32.079663,\n\t\"longitude\": 34.775528,\n\t\"search_radius_meters\": 5000\n}"
+					"raw": "{\n\t\"device_key\": \"testaccount\",\n\t\"latitude_northeast\": 32.179663,\n\t\"longitude_northeast\": 34.875528,\n\t\"latitude_southwest\": 32.05,\n\t\"longitude_southwest\": 34.6\n}"
 				},
 				"url": {
 					"raw": "http://localhost:1221/api/events/by_location",
@@ -125,7 +125,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"device_key\": \"testaccount\",\n\t\"latitude\": 43.545199, \n\t\"longitude\": -80.246926,\n\t\"search_radius_meters\": 500\n}"
+					"raw": "{\n\t\"device_key\": \"testaccount\",\n\t\"latitude_northeast\": 43.555199,\n\t\"longitude_northeast\": -80.236926,\n\t\"latitude_southwest\": 43.535199,\n\t\"longitude_southwest\": -80.256926\n}"
 				},
 				"url": {
 					"raw": "http://localhost:1221/api/events/by_location",
@@ -160,7 +160,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"device_key\": \"testaccount\",\n\t\"latitude\": 43.545199, \n\t\"longitude\": -80.246926,\n\t\"search_radius_meters\": 500\n}"
+					"raw": "{\n\t\"device_key\": \"testaccount\",\n\t\"latitude_northeast\": 43.555199,\n\t\"longitude_northeast\": -80.22,\n\t\"latitude_southwest\": 43.53,\n\t\"longitude_southwest\": -80.256926\n}"
 				},
 				"url": {
 					"raw": "http://localhost:1221/api/events/by_location",

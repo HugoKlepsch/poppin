@@ -51,6 +51,7 @@ class EventSchemaOut(JsonApiSchema):
     longitude = fields.Float()
     account_id = fields.Integer()
     time = fields.String()
+    hotness = fields.Float()
     group_size_max = fields.Integer()
     group_size_min = fields.Integer()
     title = fields.String()
