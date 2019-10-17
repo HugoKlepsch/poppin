@@ -24,7 +24,9 @@ class Event(DB.Model):
     time = DB.Column(DB.String, nullable=False)
     group_size_max = DB.Column(DB.Integer, nullable=False)
     group_size_min = DB.Column(DB.Integer, nullable=False)
-    title = DB.Column(DB.String(200), nullable=False)
+    title = DB.Column(DB.String(50), nullable=False)
+    category = DB.Column(DB.String(50), nullable=False)
+    description = DB.Column(DB.String(140), nullable=False)
 
 class EventSchemaIn(AuthenticatedMessageSchema):
     """Event marshmallow schema"""
@@ -34,6 +36,9 @@ class EventSchemaIn(AuthenticatedMessageSchema):
     group_size_max = fields.Integer()
     group_size_min = fields.Integer()
     title = fields.String()
+    category = fields.String()
+    description = fields.String()
+
 
 # TODO I don't like putting these schemas here, but I don't have a better place for them yet.
 class EventQueryByLocationSchema(AuthenticatedMessageSchema):
@@ -55,6 +60,8 @@ class EventSchemaOut(JsonApiSchema):
     group_size_max = fields.Integer()
     group_size_min = fields.Integer()
     title = fields.String()
+    category = fields.String()
+    description = fields.String()
 
 
 class AccountSchemaOut(JsonApiSchema):

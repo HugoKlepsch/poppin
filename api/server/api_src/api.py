@@ -256,7 +256,9 @@ def create_event(event_data):
                       time=time,
                       group_size_max=group_size_max,
                       group_size_min=group_size_min,
-                      title=title)
+                      title=title,
+                      description=description,
+                      category=category)
 
         DB.session.add(event)
         DB.session.commit()
