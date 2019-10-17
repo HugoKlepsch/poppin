@@ -242,6 +242,9 @@ def create_event(event_data):
     latitude = event_data.get('latitude', None)
     longitude = event_data.get('longitude', None)
     time = event_data.get('time', None)
+    description = event_data.get('description', None)
+    category = event_data.get('category', None)
+
 
     group_size_min = event_data.get('group_size_min', None)
     group_size_max = event_data.get('group_size_max', None)
