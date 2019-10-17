@@ -161,7 +161,7 @@ def calculate_event_hotness(event):
     return event
 
 
-@APP.route('/api/all_accounts', methods=['GET'])
+@APP.route('/api/all_accounts', methods=['POST'])
 @use_args(AuthenticatedMessageSchema())
 @authenticated(as_device='testaccount')  # TODO create admin account
 @marshal_with(AccountSchemaOut(many=True))
@@ -175,7 +175,7 @@ def all_accounts(_payload):
     return Account.query.all()
 
 
-@APP.route('/api/events/by_location', methods=['GET'])
+@APP.route('/api/events/by_location', methods=['POST'])
 @use_args(EventQueryByLocationSchema())
 @authenticated()
 @marshal_with(EventSchemaOut(many=True))
@@ -208,7 +208,7 @@ def events_for_area(payload):
     ).all() or [])
 
 
-@APP.route('/api/events/by_device_key', methods=['GET'])
+@APP.route('/api/events/by_device_key', methods=['POST'])
 @use_args(AuthenticatedMessageSchema())
 @authenticated()
 @marshal_with(EventSchemaOut(many=True))
@@ -246,9 +246,6 @@ def create_event(event_data):
     group_size_min = event_data.get('group_size_min', None)
     group_size_max = event_data.get('group_size_max', None)
     title = event_data.get('title', None)
-
-
-
 
     APP.logger.info('Creating event at (%f,%f)', latitude, longitude)
     try:
