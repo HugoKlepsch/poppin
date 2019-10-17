@@ -125,7 +125,7 @@ def authenticated(as_device=None):
 
             if not is_authenticated(payload=payload, as_device=as_device):
                 # TODO add the token auth
-                if payload['device_key']:
+                if 'device_key' in payload:
                     account = Account(device_key=payload['device_key'])
                     DB.session.add(account)
                     DB.session.commit()
