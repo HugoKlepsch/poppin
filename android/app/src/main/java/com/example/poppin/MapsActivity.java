@@ -61,7 +61,11 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, CreateEventFragment.OnInputListener, GoogleMap.OnMarkerClickListener,
+public class MapsActivity extends FragmentActivity
+        implements
+        OnMapReadyCallback,
+        CreateEventFragment.OnInputListener,
+        GoogleMap.OnMarkerClickListener,
         GoogleMap.OnCameraIdleListener {
 
     private static final String TAG = "MapsActivity";
@@ -142,15 +146,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         };
         LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    Activity#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for Activity#requestPermissions for more details.
+            if (
+                    checkSelfPermission(
+                            Manifest.permission.ACCESS_FINE_LOCATION)
+                            != PackageManager.PERMISSION_GRANTED
+                            &&
+                            checkSelfPermission(
+                                    Manifest.permission.ACCESS_COARSE_LOCATION)
+                                    != PackageManager.PERMISSION_GRANTED) {
+
+                /*
+                 TODO: Consider calling
+                    Activity#requestPermissions
+                 here to request the missing permissions, and then overriding
+                   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                                          int[] grantResults)
+                 to handle the case where the user grants the permission. See the documentation
+                 for Activity#requestPermissions for more details.
+                 */
                 mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                         5000, 10, mLocationListener);
             }
@@ -166,22 +179,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         try {
             if (mLocationPermissionsGranted) {
-
-                LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                LocationManager locationManager =
+                        (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                 Criteria criteria = new Criteria();
-                Location currentLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
-                Marker marker = createMarker(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), input);
 
+                Location currentLocation = locationManager
+                        .getLastKnownLocation(locationManager
+                                .getBestProvider(criteria, false));
 
-                Event event = new Event(currentLocation.getLatitude(), currentLocation.getLongitude(), input, "Description");
+                Marker marker = createMarker(
+                        new LatLng(currentLocation.getLatitude(),
+                                currentLocation.getLongitude()), input);
 
+                Event event = new Event(
+                        currentLocation.getLatitude(),
+                        currentLocation.getLongitude(),
+                        input,
+                        "Description");
 
-                addEvent(marker,  event);
+                addEvent(marker, event);
             }
-        }catch (SecurityException e) {
-            /* Permissions are not granted - get them*/
-                forcePermissionsRequest();
-
+        } catch (SecurityException e) {
+            /* Permissions are not granted - get them */
+            forcePermissionsRequest();
         }
     }
 
@@ -209,35 +229,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      *
      */
-    private void submitCredentialsForRegistration() {
-        JSONObject obj = ApplicationNetworkManager.getDefaultAuthenticatedRequest(this.accountId);
-
-        JsonObjectRequest request = new JsonObjectRequest(
-                Request.Method.GET,
-                mBaseAPIURL + "/api/signup",
-                obj,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        // load all the events into the program
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                }
-        );
-
-        ApplicationNetworkManager.getInstance(this.getApplicationContext()).addToRequestQueue(request);
-
-        return;
-    }
-
-    /**
-     *
-     */
     private void loadAccountCredentials() {
         FileInputStream fIn;
         this.accountId = new byte[256];
@@ -252,12 +243,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             byte[] bytes;
             bytes = generateAccountCredentials();
             System.arraycopy(bytes, 0, this.accountId, 0, 256);
-            submitCredentialsForRegistration();
+
         } catch (IOException e) {
             System.out.println(e.toString());
         }
-
-        return;
     }
 
     private List<WeightedLatLng> generateHeatmapWeightedList() {
@@ -330,7 +319,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     @Override
                     public void onResponse(JSONArray response) {
                         Log.d(TAG, "getEvents onResponse. response: " + response.toString()
-                              + " length: " + response.length());
+                                + " length: " + response.length());
                         try {
 
                             for (int i = 0; i < response.length(); i++) {
@@ -361,7 +350,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
         );
 
-        ApplicationNetworkManager.getInstance(this.getApplicationContext()).addToRequestQueue(request);
+        ApplicationNetworkManager
+                .getInstance(
+                        this.getApplicationContext())
+                .addToRequestQueue(request);
     }
 
     public void addEvent(Marker marker, Event event) {
@@ -376,15 +368,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Bundle bundle = new Bundle();
         bundle.putSerializable("Event", event);
 
-
         if (event != null) {
-
-            Toast.makeText(this, "Clicked Event: " + event.getName(), Toast.LENGTH_SHORT).show();
-
+            Toast.makeText(this, "Clicked Event: " + event.getName(),
+                    Toast.LENGTH_SHORT).show();
             BottomSheetFragment bottomSheetFragment = new BottomSheetFragment();
             bottomSheetFragment.setArguments(bundle);
             bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
-
         }
 
         return true;
@@ -400,7 +389,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         marker.showInfoWindow();
         return marker;
     }
-
 
     /**
      * Manipulates the map once available.
@@ -422,44 +410,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         updateHeatmap();
 
         if (mLocationPermissionsGranted) {
-
-
             setUserLocation();
             mMap.setMyLocationEnabled(true);
-            /* remove the google default button that cannot be changed. We can create our own 'Center to me' Button that doesn't get in the way */
-            //mMap.getUiSettings().setMyLocationButtonEnabled(false);
         }
     }
 
-
     private void moveCamera(LatLng latLng, float zoom) {
-        Log.d(TAG, "moveCamera: moving camera to location -> latitude:" + latLng.latitude  + " ," + latLng.longitude );
+        Log.d(TAG, "moveCamera: moving camera to location -> latitude:"
+                        + latLng.latitude  + " ," + latLng.longitude );
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
 
     private void setUserLocation() {
-
         Log.d(TAG, "getUserLocation: Getting the users location");
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         try {
             if (mLocationPermissionsGranted) {
-                    Task location = mFusedLocationProviderClient.getLastLocation();
-                    location.addOnCompleteListener(new OnCompleteListener() {
-                        @Override
-                        public void onComplete(@NonNull Task task) {
-                            if (task.isSuccessful()) {
-                                Log.d(TAG, "found location");
-                                Location  currentLocation = (Location) task.getResult();
-                                moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), DEFAULT_ZOOM);
-                            }
-                            else {
-                                Log.d(TAG, "could not find location");
-
-                            }
+                Task location = mFusedLocationProviderClient.getLastLocation();
+                location.addOnCompleteListener(new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "found location");
+                            Location  currentLocation = (Location) task.getResult();
+                            moveCamera(
+                                    new LatLng(
+                                            currentLocation.getLatitude(),
+                                            currentLocation.getLongitude()),
+                                    DEFAULT_ZOOM);
                         }
-                    });
+                        else {
+                            Log.d(TAG, "could not find location");
+                        }
+                    }
+                });
             }
-
         }
         catch (SecurityException e){
             /* Permissions are not granted - get them*/
@@ -469,41 +454,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     private void initMap() {
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(MapsActivity.this);
-
-
     }
 
 
     private void forcePermissionsRequest() {
         String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat
+                .checkSelfPermission(
+                        this.getApplicationContext(),
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED) {
+
             mLocationPermissionsGranted = true;
             initMap(); /* Permissions already granted, present the map */
-        }
-        else {
+        } else {
             /* If we don't have location permissions, force ask for them! */
-            ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE );
+            ActivityCompat.requestPermissions(
+                    this,
+                    permissions,
+                    LOCATION_PERMISSION_REQUEST_CODE);
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult
+            (int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-        switch(requestCode) {
-            case LOCATION_PERMISSION_REQUEST_CODE: {
-                    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                            mLocationPermissionsGranted = true;
-                            initMap(); /* Do not try and open the map until we have all required permissions */
-                    }
-
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                mLocationPermissionsGranted = true;
+                initMap(); /* Do not try and open the map until we have all required permissions */
             }
         }
-
-
     }
 
     @Override
