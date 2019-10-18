@@ -1,16 +1,34 @@
 package com.example.poppin;
 
+import android.os.Build;
+import android.util.Log;
+
+import androidx.annotation.RequiresApi;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class Event implements Serializable {
     private double latitude;
     private double longitude;
-    private String name;
+    private Date time;
+    private String title;
     private String description;
     private String category;
+
+    final static private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");;
 
     private int checkins;
     private int hype;
@@ -21,27 +39,33 @@ public class Event implements Serializable {
      *
      * @param lat
      * @param lon
-     * @param name
+     * @param title
+     * @param time
      * @param description
      */
-    public Event(double lat, double lon, String name, String description) {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public Event(double lat, double lon, String title, String time, String description) throws ParseException {
+
         this.setLatitude(lat);
         this.setLongitude(lon);
-        this.setName(name);
+        this.setTitle(title);
+        this.setTime(formatter.parse(time));
         this.setDescription(description);
 
         this.setCheckins(100);
         this.setHype(100);
     }
 
+
     /**
      *
      * @param jsonObj
      */
-    public Event(JSONObject jsonObj) throws JSONException {
+    public Event(JSONObject jsonObj) throws JSONException, ParseException {
         this.latitude = (Double) jsonObj.get("latitude");
         this.longitude = (Double) jsonObj.get("longitude");
-        this.name = (String) jsonObj.optString("title");
+        this.title = (String) jsonObj.optString("title");
+        this.time = formatter.parse((String) jsonObj.optString("time"));
         this.description = (String) jsonObj.optString("description");
         this.category = (String) jsonObj.optString("category");
         this.checkins = (Integer) jsonObj.optInt("checkins");
@@ -61,7 +85,8 @@ public class Event implements Serializable {
         try {
             json.put("latitude", latitude);
             json.put("longitude", longitude);
-            json.put("title", name);
+            json.put("title", title);
+            json.put("time", time);
             json.put("description", description);
             json.put("checkins", checkins);
             json.put("hype", hype);
@@ -72,27 +97,6 @@ public class Event implements Serializable {
         }
         return json;
     }
-
-    /**
-     *
-     * @return
-     */
-    public String toString() {
-        String serialJson;
-
-        serialJson = "{";
-
-        serialJson += "\"latitude\":" + "\"" + latitude + "\",";
-        serialJson += "\"longitude\":" + "\"" + longitude + "\",";
-        serialJson += "\"title\":" + "\"" + name + "\",";
-        serialJson += "\"description\":" + "\"" + description + "\",";
-        serialJson += "\"checkins\":" + "\"" + checkins + "\",";
-        serialJson += "\"hotness\":" + "\"" + hotness + "\",";
-        serialJson += "\"hype\":" + "\"" + hype + "\"}";
-
-        return serialJson;
-    }
-
 
     /**
      *
@@ -130,16 +134,16 @@ public class Event implements Serializable {
      *
      * @return
      */
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
     /**
      *
-     * @param name
+     * @param title
      */
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     /**
@@ -190,7 +194,37 @@ public class Event implements Serializable {
         this.checkins = checkins;
     }
 
+    /**
+     *
+     * @return
+     */
+    private Date getTime() {
+        return this.time;
+    }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public String getLocalTime() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("hh:mm a");
+        TimeZone timeZone = TimeZone.getDefault();
+        LocalDateTime ldt = LocalDateTime.ofInstant(this.time.toInstant(), timeZone.toZoneId());
+
+        return ldt.atOffset(ZoneOffset.UTC)
+                .atZoneSameInstant(timeZone.toZoneId())
+                .format(dtf);
+    }
+
+    public String getISOTime() {
+        return formatter.format(this.time);
+    }
+
+
+    /**
+     *
+     * @param time
+     */
+    private void setTime(Date time) {
+        this.time = time;
+    }
 
     /**
      *
