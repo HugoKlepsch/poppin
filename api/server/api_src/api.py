@@ -74,15 +74,18 @@ def setup_database(_app):  # {{{
 
             example_event = Event(account_id=example_account.id, latitude=32.079663, longitude=34.775528,
                                   group_size_max=3, group_size_min=1, title="Event 1",
-                                  time=datetime.datetime.now().isoformat())
+                                  time=datetime.datetime.now().isoformat(), description="Boomer time",
+                                  category="Party")
             DB.session.add(example_event)
             example_event_two = Event(account_id=example_account.id, latitude=43.545199, longitude=-80.246926,
                                       group_size_max=5, group_size_min=3, title="Event 2",
-                                      time=datetime.datetime.now().isoformat())
+                                      time=datetime.datetime.now().isoformat(), description="Traps at Trappers",
+                                      category="Party")
             DB.session.add(example_event_two)
             example_event_three = Event(account_id=example_account.id, latitude=43.530793, longitude=-80.229077,
                                         group_size_max=1, group_size_min=1, title="Event 3",
-                                        time=datetime.datetime.now().isoformat())
+                                        time=datetime.datetime.now().isoformat(), description="Reynolds meet and greet",
+                                        category="Networking")
             DB.session.add(example_event_three)
             DB.session.commit()
 
@@ -242,6 +245,9 @@ def create_event(event_data):
     latitude = event_data.get('latitude', None)
     longitude = event_data.get('longitude', None)
     time = event_data.get('time', None)
+    description = event_data.get('description', None)
+    category = event_data.get('category', None)
+
 
     group_size_min = event_data.get('group_size_min', None)
     group_size_max = event_data.get('group_size_max', None)
@@ -256,7 +262,9 @@ def create_event(event_data):
                       time=time,
                       group_size_max=group_size_max,
                       group_size_min=group_size_min,
-                      title=title)
+                      title=title,
+                      description=description,
+                      category=category)
 
         DB.session.add(event)
         DB.session.commit()
