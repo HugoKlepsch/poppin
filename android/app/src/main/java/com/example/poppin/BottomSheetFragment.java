@@ -14,6 +14,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 public class BottomSheetFragment extends BottomSheetDialogFragment {
 
     TextView titleView;
+    private TextView categoryView;
 
     public BottomSheetFragment() {
 
@@ -34,6 +35,9 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         Event event = (Event)bundle.getSerializable("Event");
         titleView = view.findViewById(R.id.event_title);
         titleView.setText(event.getName());
+
+        categoryView = view.findViewById(R.id.category);
+        categoryView.setText(event.getCategory());
 
         super.onViewCreated(view, savedInstanceState);
     }

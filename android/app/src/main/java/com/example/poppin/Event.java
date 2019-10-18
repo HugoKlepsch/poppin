@@ -10,6 +10,7 @@ public class Event implements Serializable {
     private double longitude;
     private String name;
     private String description;
+    private String category;
 
     private int checkins;
     private int hype;
@@ -42,6 +43,7 @@ public class Event implements Serializable {
         this.longitude = (Double) jsonObj.get("longitude");
         this.name = (String) jsonObj.optString("title");
         this.description = (String) jsonObj.optString("description");
+        this.category = (String) jsonObj.optString("category");
         this.checkins = (Integer) jsonObj.optInt("checkins");
         this.hype = (Integer) jsonObj.optInt("hype");
         this.hotness = (Double) jsonObj.optDouble("hotness");
@@ -154,6 +156,22 @@ public class Event implements Serializable {
      */
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public String getCategory() {
+        return this.category;
+    }
+
+    /**
+     *
+     * @param category
+     */
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     /**
