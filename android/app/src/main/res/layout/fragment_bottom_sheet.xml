@@ -61,6 +61,7 @@
     </LinearLayout>
 
     <TextView
+        android:id="@+id/location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="6dp"
@@ -76,10 +77,10 @@
         android:text="Category" />
 
     <TextView
+        android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="6dp"
-
         android:drawablePadding="16dp"
         android:text="Wed, 10 AM - 9 PM" />
     <LinearLayout

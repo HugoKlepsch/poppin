@@ -1,6 +1,7 @@
 package com.example.poppin;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -49,7 +50,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -173,31 +178,33 @@ public class MapsActivity extends FragmentActivity
 
 
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void sendInput(String input) {
         Log.e(TAG, "got the input: " + input);
         Toast.makeText(this, "Inputted:" + input, Toast.LENGTH_SHORT).show();
 
         try {
             if (mLocationPermissionsGranted) {
-                LocationManager locationManager =
-                        (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                Criteria criteria = new Criteria();
+                try {
+                    LocationManager locationManager =
+                            (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                    Criteria criteria = new Criteria();
 
-                Location currentLocation = locationManager
-                        .getLastKnownLocation(locationManager
-                                .getBestProvider(criteria, false));
+                    Location currentLocation = locationManager
+                            .getLastKnownLocation(locationManager
+                                    .getBestProvider(criteria, false));
 
-                Marker marker = createMarker(
-                        new LatLng(currentLocation.getLatitude(),
-                                currentLocation.getLongitude()), input);
+                    Marker marker = createMarker(
+                            new LatLng(currentLocation.getLatitude(),
+                                    currentLocation.getLongitude()), input);
 
-                Event event = new Event(
-                        currentLocation.getLatitude(),
-                        currentLocation.getLongitude(),
-                        input,
-                        "Description");
+                    Event event = new Event(currentLocation.getLatitude(),
+                            currentLocation.getLongitude(), input, new Date().toString(), "Description");
 
-                addEvent(marker, event);
+                    addEvent(marker, event);
+                } catch (ParseException e) {
+                    Log.e("ERROR", "Cannot create due to format parse error");
+                }
             }
         } catch (SecurityException e) {
             /* Permissions are not granted - get them */
@@ -323,18 +330,22 @@ public class MapsActivity extends FragmentActivity
                         try {
 
                             for (int i = 0; i < response.length(); i++) {
-                                Event event = new Event((JSONObject) response.get(i));
+                                try {
+                                    Event event = new Event((JSONObject) response.get(i));
 
-                                addEvent(
-                                        createMarker(
-                                                new LatLng(
-                                                        event.getLatitude(),
-                                                        event.getLongitude()
-                                                ),
-                                                event.getName()
-                                        ),
-                                        event
-                                );
+                                    addEvent(
+                                            createMarker(
+                                                    new LatLng(
+                                                            event.getLatitude(),
+                                                            event.getLongitude()
+                                                    ),
+                                                    event.getTitle()
+                                            ),
+                                            event
+                                    );
+                                } catch (ParseException e) {
+                                    Log.e("ERROR", "Found event with incorrect date signature");
+                                }
                             }
                         } catch (JSONException e) {
                             // ignore
@@ -369,8 +380,9 @@ public class MapsActivity extends FragmentActivity
         bundle.putSerializable("Event", event);
 
         if (event != null) {
-            Toast.makeText(this, "Clicked Event: " + event.getName(),
+            Toast.makeText(this, "Clicked Event: " + event.getTitle(),
                     Toast.LENGTH_SHORT).show();
+
             BottomSheetFragment bottomSheetFragment = new BottomSheetFragment();
             bottomSheetFragment.setArguments(bundle);
             bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
@@ -494,6 +506,8 @@ public class MapsActivity extends FragmentActivity
     @Override
     public void onCameraIdle() {
         Log.d(TAG, "Camera Idle, getting events");
+        markerMap.clear();
+        mMap.clear();
         getEvents();
         updateHeatmap();
     }
