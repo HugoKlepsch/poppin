@@ -389,7 +389,6 @@ public class MapsActivity extends FragmentActivity
         }
 
         return true;
-
     }
 
     public Marker createMarker(LatLng latLng, String title) {
@@ -444,14 +443,13 @@ public class MapsActivity extends FragmentActivity
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "found location");
-                            Location  currentLocation = (Location) task.getResult();
+                            Location currentLocation = (Location) task.getResult();
                             moveCamera(
                                     new LatLng(
                                             currentLocation.getLatitude(),
                                             currentLocation.getLongitude()),
                                     DEFAULT_ZOOM);
-                        }
-                        else {
+                        } else {
                             Log.d(TAG, "could not find location");
                         }
                     }

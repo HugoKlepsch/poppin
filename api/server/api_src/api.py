@@ -75,17 +75,17 @@ def setup_database(_app):  # {{{
             example_event = Event(account_id=example_account.id, latitude=32.079663, longitude=34.775528,
                                   group_size_max=3, group_size_min=1, title="Event 1",
                                   category="Category 1", time=datetime.datetime.utcnow(),
-                                  description="")
+                                  description="Description 1")
             DB.session.add(example_event)
             example_event_two = Event(account_id=example_account.id, latitude=43.545199, longitude=-80.246926,
                                       group_size_max=5, group_size_min=3, title="Event 2",
                                       category="Category 2", time=datetime.datetime.utcnow(),
-                                      description="")
+                                      description="Description 2")
             DB.session.add(example_event_two)
             example_event_three = Event(account_id=example_account.id, latitude=43.530793, longitude=-80.229077,
                                         group_size_max=1, group_size_min=1, title="Event 3",
                                         category="Category 3", time=datetime.datetime.utcnow(),
-                                        description="")
+                                        description="Description 3")
             DB.session.add(example_event_three)
             DB.session.commit()
 
