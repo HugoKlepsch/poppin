@@ -6,55 +6,77 @@
     android:layout_height="wrap_content"
     android:background="#ffffff"
     android:orientation="vertical"
-    android:padding="12dp"
+    android:padding="18dp"
+    android:paddingHorizontal="20dp"
     app:behavior_hideable="false"
     app:behavior_peekHeight="100dp"
     app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="96dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
-
-
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="5"
+            android:layout_weight="0.90"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/event_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Event Title"
+                android:text="Event"
                 android:textColor="#000000"
-                android:textSize="24sp"
+                android:textSize="32dp"
                 android:textStyle="bold" />
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_weight="0.10">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal">
+                android:layout_marginVertical="6dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/fire"/>
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Hype Rating HOT"
-                    android:textColor="@color/colorAccent" />
-
-                <TextView
+                    android:id="@+id/hotness"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
-                    android:text=" From 51 Users"
-                    android:textColor="@color/colorAccent" />
+                    android:text="HOT"
+                    android:textColor="@color/colorAccent"/>
 
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/person"/>
+
+                <TextView
+                    android:id="@+id/checkins"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="51"
+                    android:textColor="@color/colorPrimaryDark" />
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -64,7 +86,7 @@
         android:id="@+id/location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="6dp"
+        android:layout_marginTop="6dp"
         android:drawablePadding="16dp"
         android:text="Location" />
 
@@ -72,7 +94,7 @@
         android:id="@+id/category"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="6dp"
+        android:layout_marginTop="6dp"
         android:drawablePadding="16dp"
         android:text="Category" />
 
@@ -80,35 +102,47 @@
         android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="6dp"
+        android:layout_marginTop="6dp"
         android:drawablePadding="16dp"
-        android:text="Wed, 10 AM - 9 PM" />
+        android:text="10:30pm" />
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="96dp"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/description"
+            android:layout_marginVertical="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Description"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-
-
         <Button
-            android:layout_margin="6dp"
-
+            android:layout_marginVertical="6dp"
+            android:layout_marginRight="6dp"
             android:layout_weight="1"
             android:id="@+id/button1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
-            android:text="Directions" />
-        <Button
-            android:layout_margin="6dp"
+            android:text="Directions"/>
 
+        <Button
+            android:layout_marginVertical="6dp"
+            android:layout_marginLeft="6dp"
             android:layout_weight="1"
             android:id="@+id/button2"
             android:layout_width="0dp"
             android:background="@color/colorAccent"
             android:layout_height="wrap_content"
             android:text="Check in" />
-
 
     </LinearLayout>
 

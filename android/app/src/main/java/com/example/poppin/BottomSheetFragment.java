@@ -21,6 +21,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     private TextView titleView;
     private TextView categoryView;
     private TextView timeView;
+    private TextView descriptionView;
 
     public BottomSheetFragment() {
 
@@ -49,6 +50,9 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         categoryView = view.findViewById(R.id.category);
         categoryView.setText(event.getCategory());
 
+        descriptionView = view.findViewById(R.id.description);
+        descriptionView.setText(event.getDescription());
+
         super.onViewCreated(view, savedInstanceState);
     }
 
@@ -57,6 +61,5 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         return inflater.inflate(R.layout.fragment_bottom_sheet, container, false);
-
     }
 }
