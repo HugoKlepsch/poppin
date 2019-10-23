@@ -21,6 +21,7 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
     private TextView titleView;
     private TextView categoryView;
     private TextView timeView;
+    private TextView descriptionView;
 
 
     public ViewEventBottomSheetFragment() {
@@ -44,13 +45,14 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         txtTitle.setText(event.getTitle());
 
 
-        txtGroupSize = view.findViewById(R.id.txtGroupSize);
+        txtGroupSize = view.findViewById(R.id.expected_group_size);
         String groupSizeDialog = String.format("Recommended Group Size: (%d - %d)", event.getRecommendedGroupSizeMin(), event.getRecommendedGroupSizeMax());
         txtGroupSize.setText(groupSizeDialog);
 
 
-        imgGroupSize = view.findViewById(R.id.imgGroupIcon);
-        imgGroupSize.setImageResource(R.drawable.ic_group);
+        descriptionView = view.findViewById(R.id.description);
+        descriptionView.setText(event.getDescription());
+
 
 
         super.onViewCreated(view, savedInstanceState);
