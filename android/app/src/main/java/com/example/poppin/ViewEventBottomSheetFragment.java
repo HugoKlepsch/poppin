@@ -14,9 +14,13 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
 
-    TextView txtTitle;
-    TextView txtGroupSize;
-    ImageView imgGroupSize;
+
+    private TextView txtTitle;
+    private TextView txtGroupSize;
+    private ImageView imgGroupSize;
+    private TextView titleView;
+    private TextView categoryView;
+    private TextView timeView;
 
 
     public ViewEventBottomSheetFragment() {

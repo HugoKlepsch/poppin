@@ -30,8 +30,7 @@ public class Event implements Serializable {
     private int recommendedGroupSizeMax;
     private String category;
 
-    final static private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");;
-
+    final static private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private int checkins;
     private int hype;
 
@@ -101,7 +100,10 @@ public class Event implements Serializable {
             json.put("group_size_max", recommendedGroupSizeMax);
             json.put("group_size_min", recommendedGroupSizeMin);
 
+
         } catch (JSONException e) {
+
+
             e.printStackTrace();
             return null;
         }
@@ -130,7 +132,6 @@ public class Event implements Serializable {
 
 
     /**
-     *
      * @return
      */
     public double getLatitude() {
@@ -138,7 +139,6 @@ public class Event implements Serializable {
     }
 
     /**
-     *
      * @param latitude
      */
     public void setLatitude(double latitude) {
@@ -146,7 +146,6 @@ public class Event implements Serializable {
     }
 
     /**
-     *
      * @return
      */
     public double getLongitude() {
@@ -154,7 +153,6 @@ public class Event implements Serializable {
     }
 
     /**
-     *
      * @param longitude
      */
     public void setLongitude(double longitude) {
@@ -162,7 +160,6 @@ public class Event implements Serializable {
     }
 
     /**
-     *
      * @return
      */
     public String getTitle() {
@@ -178,7 +175,6 @@ public class Event implements Serializable {
     }
 
     /**
-     *
      * @return
      */
     public String getDescription() {
@@ -186,7 +182,6 @@ public class Event implements Serializable {
     }
 
     /**
-     *
      * @param description
      */
     public void setDescription(String description) {
@@ -217,7 +212,6 @@ public class Event implements Serializable {
     }
 
     /**
-     *
      * @param checkins
      */
     public void setCheckins(int checkins) {
@@ -265,7 +259,6 @@ public class Event implements Serializable {
     }
 
     /**
-     *
      * @param hype
      */
     public void setHype(int hype) {
