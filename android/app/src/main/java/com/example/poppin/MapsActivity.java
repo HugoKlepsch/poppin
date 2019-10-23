@@ -383,9 +383,10 @@ public class MapsActivity extends FragmentActivity
             Toast.makeText(this, "Clicked Event: " + event.getTitle(),
                     Toast.LENGTH_SHORT).show();
 
-            BottomSheetFragment bottomSheetFragment = new BottomSheetFragment();
-            bottomSheetFragment.setArguments(bundle);
-            bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
+            ViewEventBottomSheetFragment viewEventBottomSheetFragment = new ViewEventBottomSheetFragment();
+            viewEventBottomSheetFragment.setArguments(bundle);
+            viewEventBottomSheetFragment.show(getSupportFragmentManager(), viewEventBottomSheetFragment.getTag());
+
         }
 
         return true;
