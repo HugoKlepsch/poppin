@@ -259,10 +259,12 @@ public class MapsActivity extends FragmentActivity
     private List<WeightedLatLng> generateHeatmapWeightedList() {
         List<WeightedLatLng> list = new ArrayList<>();
 
-        for (Event event : markerMap.values()) {
-            list.add(new WeightedLatLng(
-                    new LatLng(event.getLatitude(), event.getLongitude()),
-                    event.getHotness()));
+        synchronized (markerMap) {
+            for (Event event : markerMap.values()) {
+                list.add(new WeightedLatLng(
+                        new LatLng(event.getLatitude(), event.getLongitude()),
+                        event.getHotness()));
+            }
         }
         list.add(new WeightedLatLng(currentLocation, 0.1)); // Can't be empty
 
@@ -328,12 +330,13 @@ public class MapsActivity extends FragmentActivity
                         Log.d(TAG, "getEvents onResponse. response: " + response.toString()
                                 + " length: " + response.length());
                         try {
+                            Map<Marker, Event> newMap = new HashMap<>();
 
                             for (int i = 0; i < response.length(); i++) {
                                 try {
                                     Event event = new Event((JSONObject) response.get(i));
 
-                                    addEvent(
+                                    newMap.put(
                                             createMarker(
                                                     new LatLng(
                                                             event.getLatitude(),
@@ -346,6 +349,9 @@ public class MapsActivity extends FragmentActivity
                                 } catch (ParseException e) {
                                     Log.e("ERROR", "Found event with incorrect date signature");
                                 }
+                            }
+                            synchronized (markerMap) {
+                                markerMap = newMap;
                             }
                         } catch (JSONException e) {
                             // ignore
@@ -368,13 +374,18 @@ public class MapsActivity extends FragmentActivity
     }
 
     public void addEvent(Marker marker, Event event) {
-        markerMap.put(marker, event);
+        synchronized (markerMap) {
+            markerMap.put(marker, event);
+        }
     }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
         //Get the model from the hashmap based on the clicked event
-        Event event = markerMap.get(marker);
+        Event event;
+        synchronized (markerMap) {
+            event = markerMap.get(marker);
+        }
 
         Bundle bundle = new Bundle();
         bundle.putSerializable("Event", event);
@@ -505,10 +516,9 @@ public class MapsActivity extends FragmentActivity
     @Override
     public void onCameraIdle() {
         Log.d(TAG, "Camera Idle, getting events");
-        markerMap.clear();
         mMap.clear();
         getEvents();
-        updateHeatmap();
+        updateHeatmap(); // This is a race condition with the request to getEvents... not sure what to do here.
     }
 }
 
