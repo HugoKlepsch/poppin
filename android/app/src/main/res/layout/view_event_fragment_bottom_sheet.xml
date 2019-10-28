@@ -96,6 +96,7 @@
             android:id="@+id/expected_group_size"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
             android:text="expected group size" />
     </LinearLayout>
 
@@ -114,7 +115,7 @@
             android:id="@+id/location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
+            android:layout_marginLeft="8dp"
             android:text="Location" />
 
     </LinearLayout>
@@ -133,7 +134,7 @@
             android:id="@+id/time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
+            android:layout_marginLeft="8dp"
             android:text="10:30pm" />
 
     </LinearLayout>
