@@ -199,7 +199,8 @@ public class MapsActivity extends FragmentActivity
                                     currentLocation.getLongitude()), input);
 
                     Event event = new Event(currentLocation.getLatitude(),
-                            currentLocation.getLongitude(), input, new Date().toString(), "Description");
+                            currentLocation.getLongitude(), input, new Date().toString(), "Description",
+                            99, 1);
 
                     addEvent(marker, event);
                 } catch (ParseException e) {

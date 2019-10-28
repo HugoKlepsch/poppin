@@ -47,7 +47,8 @@ public class Event implements Serializable {
      * @param description
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public Event(double lat, double lon, String title, String time, String description) throws ParseException {
+    public Event(double lat, double lon, String title, String time, String description,
+                 int groupSizeMax, int groupSizeMin) throws ParseException {
 
         this.setLatitude(lat);
         this.setLongitude(lon);
@@ -55,8 +56,8 @@ public class Event implements Serializable {
         this.setTime(formatter.parse(time));
         this.setDescription(description);
         /* Temporary setting default data */
-        this.setRecommendedGroupSizeMax(6);
-        this.setRecommendedGroupSizeMin(1);
+        this.setRecommendedGroupSizeMax(groupSizeMax);
+        this.setRecommendedGroupSizeMin(groupSizeMin);
 
         this.setCheckins(100);
         this.setHype(100);
