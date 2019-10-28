@@ -8,18 +8,14 @@
     android:layout_height="match_parent"
     tools:context=".MapsActivity">
 
-<Button
-
-    android:layout_gravity="center_horizontal|bottom"
-    android:background="@drawable/new_event_button"
-    android:text="+"
-    android:id="@+id/create_event"
-    android:layout_width="50dp"
-    android:layout_height="50dp"
-    android:textColor="#FFFFFF"
-    android:textStyle="bold">
-</Button>
-
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/create_event"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:src="@drawable/ic_add_black_24dp"
+        android:contentDescription="@string/createEventFAB"
+        android:layout_margin="16dp" />
 
 
 </fragment>
