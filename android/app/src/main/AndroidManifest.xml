@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.poppin">
-
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -11,7 +10,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -20,7 +18,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-
+        <activity
+            android:name=".CreateEventActivity"
+            android:label="@string/title_activity_create_event"
+            android:parentActivityName=".MapsActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.poppin.MapsActivity" />
+        </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -32,25 +38,23 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
-                android:noHistory="true">
-        <!-- No History Ensures that once this activity is run, it cannot be returned to -->
+            android:noHistory="true">
 
-      <intent-filter>
-          <category android:name="android.intent.category.LAUNCHER" />
-          <action android:name="android.intent.action.MAIN" />
-      </intent-filter>
+            <!-- No History Ensures that once this activity is run, it cannot be returned to -->
 
-  </activity>
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
 
-  <activity
-      android:name=".MapsActivity"
-      android:label="@string/title_activity_maps" />
-
-
-
-</application>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".MapsActivity"
+            android:label="@string/title_activity_maps" />
+    </application>
 
 </manifest>

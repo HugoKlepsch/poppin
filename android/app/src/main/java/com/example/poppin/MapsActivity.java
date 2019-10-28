@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentManager;
 
 import android.content.Context;
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Criteria;
@@ -122,8 +123,12 @@ public class MapsActivity extends FragmentActivity
         createEventFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent = new Intent(MapsActivity.this, CreateEventActivity.class);
+                startActivity(intent);
+                /* TODO open the createEventActivity
                 CreateEventFragment fragment = new CreateEventFragment();
                 fragment.show(mFragmentManager, "Create Event");
+                 */
             }
         });
 
