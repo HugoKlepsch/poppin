@@ -2,5 +2,6 @@
     <string name="app_name">Poppin</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_main">Main</string>
+    <string name="createEventFAB">Create event</string>
 
 </resources>

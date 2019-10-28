@@ -42,6 +42,7 @@ import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.maps.android.heatmaps.Gradient;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
 import com.google.maps.android.heatmaps.WeightedLatLng;
@@ -115,10 +116,9 @@ public class MapsActivity extends FragmentActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        Button createEventClick = (Button) findViewById(R.id.create_event);
+        FloatingActionButton createEventFAB = (FloatingActionButton) findViewById(R.id.create_event);
 
-        //createEventClick.setOnClickListener(MapsActivity.this);
-        createEventClick.setOnClickListener(new View.OnClickListener() {
+        createEventFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 CreateEventFragment fragment = new CreateEventFragment();
