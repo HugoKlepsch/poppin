@@ -47,14 +47,15 @@ public class Event implements Serializable {
      * @param description
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public Event(double lat, double lon, String title, String time, String description,
-                 int groupSizeMax, int groupSizeMin) throws ParseException {
+    public Event(double lat, double lon, String title, Date time, String description,
+                 String category, int groupSizeMax, int groupSizeMin) throws ParseException {
 
         this.setLatitude(lat);
         this.setLongitude(lon);
         this.setTitle(title);
-        this.setTime(formatter.parse(time));
+        this.setTime(time);
         this.setDescription(description);
+        this.setCategory(category);
         /* Temporary setting default data */
         this.setRecommendedGroupSizeMax(groupSizeMax);
         this.setRecommendedGroupSizeMin(groupSizeMin);
@@ -95,8 +96,9 @@ public class Event implements Serializable {
             json.put("latitude", latitude);
             json.put("longitude", longitude);
             json.put("title", title);
-            json.put("time", time);
+            json.put("time", getISOTime());
             json.put("description", description);
+            json.put("category", category);
             json.put("checkins", checkins);
             json.put("hype", hype);
             json.put("hotness", hotness);

@@ -56,6 +56,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -199,8 +200,12 @@ public class MapsActivity extends FragmentActivity
                                     currentLocation.getLongitude()), input);
 
                     Event event = new Event(currentLocation.getLatitude(),
-                            currentLocation.getLongitude(), input, new Date().toString(), "Description",
-                            99, 1);
+                            currentLocation.getLongitude(), input, new Date(),
+                            "Description", // TODO description
+                            "", // TODO category
+                            99, 1); // TODO group size
+
+                    sendEventToAPI(event);
 
                     addEvent(marker, event);
                 } catch (ParseException e) {
@@ -363,9 +368,54 @@ public class MapsActivity extends FragmentActivity
         );
 
         ApplicationNetworkManager
-                .getInstance(
-                        this.getApplicationContext())
+                .getInstance(this.getApplicationContext())
                 .addToRequestQueue(request);
+    }
+
+    public void sendEventToAPI(Event event) {
+        JSONObject obj = ApplicationNetworkManager.getDefaultAuthenticatedRequest(this.accountId);
+
+        Log.d(TAG, "sendEventToAPI start");
+
+        // Merge the authenticated JSONObject with the event JSONObject. This kind of sucks.
+        JSONObject event_obj = event.serialize();
+        Iterator<String> keys = event_obj.keys();
+        String key;
+        while (keys.hasNext()) {
+            key = keys.next();
+
+            try {
+                obj.put(key, event_obj.get(key));
+            } catch (JSONException e) {
+                e.printStackTrace();
+                break;
+            }
+
+        }
+
+        JsonRequest request = new JsonObjectRequest(
+                Request.Method.POST,
+                mBaseAPIURL + "/api/event",
+                obj,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d(TAG, "sendEventToAPI onResponse. response: " + response.toString()
+                                + " length: " + response.length());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(TAG, "sendEventToAPI error response" + error.toString());
+                    }
+                }
+        );
+
+        ApplicationNetworkManager
+                .getInstance(this.getApplicationContext())
+                .addToRequestQueue(request);
+
     }
 
     public void addEvent(Marker marker, Event event) {
