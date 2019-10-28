@@ -49,6 +49,7 @@ public class Event implements Serializable {
     @RequiresApi(api = Build.VERSION_CODES.O)
     public Event(double lat, double lon, String title, Date time, String description,
                  String category, int groupSizeMax, int groupSizeMin) throws ParseException {
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         this.setLatitude(lat);
         this.setLongitude(lon);
@@ -70,6 +71,8 @@ public class Event implements Serializable {
      * @param jsonObj
      */
     public Event(JSONObject jsonObj) throws JSONException, ParseException {
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+
         this.latitude = (Double) jsonObj.get("latitude");
         this.longitude = (Double) jsonObj.get("longitude");
         this.title = (String) jsonObj.optString("title");
@@ -223,7 +226,6 @@ public class Event implements Serializable {
         LocalDateTime ldt = LocalDateTime.ofInstant(this.time.toInstant(), timeZone.toZoneId());
 
         return ldt.atOffset(ZoneOffset.UTC)
-                .atZoneSameInstant(timeZone.toZoneId())
                 .format(dtf);
     }
 
