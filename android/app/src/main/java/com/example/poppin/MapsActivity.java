@@ -199,7 +199,8 @@ public class MapsActivity extends FragmentActivity
                                     currentLocation.getLongitude()), input);
 
                     Event event = new Event(currentLocation.getLatitude(),
-                            currentLocation.getLongitude(), input, new Date().toString(), "Description");
+                            currentLocation.getLongitude(), input, new Date().toString(), "Description",
+                            99, 1);
 
                     addEvent(marker, event);
                 } catch (ParseException e) {
@@ -383,9 +384,10 @@ public class MapsActivity extends FragmentActivity
             Toast.makeText(this, "Clicked Event: " + event.getTitle(),
                     Toast.LENGTH_SHORT).show();
 
-            BottomSheetFragment bottomSheetFragment = new BottomSheetFragment();
-            bottomSheetFragment.setArguments(bundle);
-            bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
+            ViewEventBottomSheetFragment viewEventBottomSheetFragment = new ViewEventBottomSheetFragment();
+            viewEventBottomSheetFragment.setArguments(bundle);
+            viewEventBottomSheetFragment.show(getSupportFragmentManager(), viewEventBottomSheetFragment.getTag());
+
         }
 
         return true;

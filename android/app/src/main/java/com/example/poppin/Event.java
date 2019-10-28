@@ -27,6 +27,9 @@ public class Event implements Serializable {
     private String title;
     private String description;
     private String category;
+    private int recommendedGroupSizeMin;
+    private int recommendedGroupSizeMax;
+
 
     final static private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");;
 
@@ -44,13 +47,17 @@ public class Event implements Serializable {
      * @param description
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public Event(double lat, double lon, String title, String time, String description) throws ParseException {
+    public Event(double lat, double lon, String title, String time, String description,
+                 int groupSizeMax, int groupSizeMin) throws ParseException {
 
         this.setLatitude(lat);
         this.setLongitude(lon);
         this.setTitle(title);
         this.setTime(formatter.parse(time));
         this.setDescription(description);
+        /* Temporary setting default data */
+        this.setRecommendedGroupSizeMax(groupSizeMax);
+        this.setRecommendedGroupSizeMin(groupSizeMin);
 
         this.setCheckins(100);
         this.setHype(100);
@@ -71,6 +78,8 @@ public class Event implements Serializable {
         this.checkins = (Integer) jsonObj.optInt("checkins");
         this.hype = (Integer) jsonObj.optInt("hype");
         this.hotness = (Double) jsonObj.optDouble("hotness");
+        this.recommendedGroupSizeMax = (Integer) jsonObj.get("group_size_max");
+        this.recommendedGroupSizeMin = (Integer) jsonObj.get("group_size_min");
     }
 
     /**
@@ -91,6 +100,9 @@ public class Event implements Serializable {
             json.put("checkins", checkins);
             json.put("hype", hype);
             json.put("hotness", hotness);
+            json.put("group_size_max", recommendedGroupSizeMax);
+            json.put("group_size_min", recommendedGroupSizeMin);
+
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -257,4 +269,37 @@ public class Event implements Serializable {
     public void setHotness(double hotness) {
         this.hotness = hotness;
     }
+
+    /**
+     * @param recommendedGroupSizeMin
+     */
+    public void setRecommendedGroupSizeMin(int recommendedGroupSizeMin) {
+        this.recommendedGroupSizeMin = recommendedGroupSizeMin;
+    }
+
+
+    /**
+     * @return
+     */
+    public int getRecommendedGroupSizeMin() {
+        return recommendedGroupSizeMin;
+    }
+
+
+    /**
+     * @param recommendedGroupSizeMax
+     */
+    public void setRecommendedGroupSizeMax(int recommendedGroupSizeMax) {
+        this.recommendedGroupSizeMax = recommendedGroupSizeMax;
+    }
+
+    /**
+     * @return
+     */
+    public int getRecommendedGroupSizeMax() {
+        return recommendedGroupSizeMax;
+    }
+
+
+
 }
