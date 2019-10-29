@@ -166,7 +166,7 @@ public class CreateEventBottomSheetFragment extends BottomSheetDialogFragment {
 
     private void setupCategoryPicker(View view) {
         categorySelect.setMinValue(0);
-        categorySelect.setMaxValue(2);
+        categorySelect.setMaxValue(3);
         categorySelect.setClickable(false);
         categorySelect.setLongClickable(false);
         categorySelect.setDisplayedValues(categories);
