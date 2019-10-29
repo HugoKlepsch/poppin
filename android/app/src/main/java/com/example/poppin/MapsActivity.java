@@ -75,6 +75,7 @@ public class MapsActivity extends FragmentActivity
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnCameraIdleListener {
 
+
     private static final String TAG = "MapsActivity";
     private GoogleMap mMap;
 
@@ -497,10 +498,13 @@ public class MapsActivity extends FragmentActivity
         }
     }
 
+
+
     private void moveCamera(LatLng latLng, float zoom) {
         Log.d(TAG, "moveCamera: moving camera to location -> latitude:"
                         + latLng.latitude  + " ," + latLng.longitude );
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+
     }
 
     private void setUserLocation() {
@@ -572,11 +576,26 @@ public class MapsActivity extends FragmentActivity
         }
     }
 
+    /**
+     *
+     * @param zoom
+     * @return
+     */
+    private int getRadiusFromZoom(float zoom) {
+        int radius = (int) (zoom * 10);
+        Log.d("Zoom", "zoom: radius = " + zoom + ": " + radius);
+        return radius;
+    }
+
+    /**
+     *
+     */
     @Override
     public void onCameraIdle() {
         Log.d(TAG, "Camera Idle, getting events");
         markerMap.clear();
         loadEventsFromAPI();
+        mProvider.setRadius(getRadiusFromZoom(mMap.getCameraPosition().zoom));
     }
 }
 
