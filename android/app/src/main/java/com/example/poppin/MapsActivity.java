@@ -251,6 +251,38 @@ public class MapsActivity extends FragmentActivity
         }
     }
 
+    private double chopDouble(double d) {
+        return ((int) (d * 10000)) / 10000.00;
+    }
+
+    private List<WeightedLatLng> generateDemoPoints(Event event) {
+        int numPoints = (int) event.getHotness() * 50;
+        double weight = 1.0;//event.getHotness();
+        Random random = new Random();
+
+        List<WeightedLatLng> points = new ArrayList<>();
+
+        for (int i = 0; i < numPoints; i++) {
+            double constant = 0.001;
+
+            double offsetLat = chopDouble(random.nextGaussian() * constant);
+            double offsetLng = chopDouble(random.nextGaussian() * constant);
+
+            LatLng newPoint = new LatLng(
+                    event.getLatitude() + offsetLat,
+                    event.getLongitude() + offsetLng);
+
+            double intensity = event.getHotness() *
+                    (Math.sqrt(Math.pow(offsetLat, 2) + Math.pow(offsetLng, 2)) / constant);
+
+            Log.d("intensity", ": " + intensity);
+
+            points.add(new WeightedLatLng(newPoint, intensity));
+        }
+
+        return points;
+    }
+
     private List<WeightedLatLng> generateHeatmapWeightedList() {
         List<WeightedLatLng> list = new ArrayList<>();
 
@@ -258,8 +290,9 @@ public class MapsActivity extends FragmentActivity
             list.add(new WeightedLatLng(
                     new LatLng(event.getLatitude(), event.getLongitude()),
                     event.getHotness()));
+            list.addAll(generateDemoPoints(event));
         }
-        list.add(new WeightedLatLng(currentLocation, 0.1)); // Can't be empty
+        list.add(new WeightedLatLng(currentLocation, 0.0000001)); // Can't be empty
 
         return list;
     }
@@ -284,6 +317,7 @@ public class MapsActivity extends FragmentActivity
                 .weightedData(list)
                 .gradient(gradient)
                 .build();
+        mProvider.setRadius(75);
         mOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
     }
 
@@ -298,10 +332,10 @@ public class MapsActivity extends FragmentActivity
      *
      * @return
      */
-    private void getEvents() {
+    private void loadEventsFromAPI() {
         JSONObject obj = ApplicationNetworkManager.getDefaultAuthenticatedRequest(this.accountId);
 
-        Log.d(TAG, "getEvents start");
+        Log.d(TAG, "loadEventsFromAPI start");
         LatLngBounds curScreen = mMap.getProjection().getVisibleRegion().latLngBounds;
 
         try {
@@ -320,7 +354,7 @@ public class MapsActivity extends FragmentActivity
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        Log.d(TAG, "getEvents onResponse. response: " + response.toString()
+                        Log.d(TAG, "loadEventsFromAPI onResponse. response: " + response.toString()
                                 + " length: " + response.length());
                         try {
 
@@ -334,14 +368,19 @@ public class MapsActivity extends FragmentActivity
                             }
                         } catch (JSONException e) {
                             // ignore
-                            Log.e(TAG, "getEvents json exception" + e.toString());
+                            Log.e(TAG, "loadEventsFromAPI json exception" + e.toString());
                         }
+
+                        if (mProvider == null) {
+                            createHeatmap();
+                        }
+                        updateHeatmap();
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "getEvents error response" + error.toString());
+                        Log.e(TAG, "loadEventsFromAPI error response" + error.toString());
                     }
                 }
         );
@@ -447,9 +486,10 @@ public class MapsActivity extends FragmentActivity
         mMap.setOnCameraIdleListener(this);
         Log.d(TAG, "onMapReady: Maps are running with Full Permissions.");
         mMap.setOnMarkerClickListener(this);
-        getEvents();
-        createHeatmap();
-        updateHeatmap();
+
+        // initialize to Null, since it is generated in the following function.
+        mProvider = null;
+        loadEventsFromAPI();
 
         if (mLocationPermissionsGranted) {
             setUserLocation();
@@ -536,9 +576,7 @@ public class MapsActivity extends FragmentActivity
     public void onCameraIdle() {
         Log.d(TAG, "Camera Idle, getting events");
         markerMap.clear();
-        mMap.clear();
-        getEvents();
-        updateHeatmap();
+        loadEventsFromAPI();
     }
 }
 
