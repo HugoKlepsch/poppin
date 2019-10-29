@@ -2,6 +2,8 @@ package com.example.poppin;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +40,42 @@ public class CreateEventBottomSheetFragment extends BottomSheetDialogFragment {
         void onEventCreate(Event event);
     }
 
+    private TextWatcher mTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+                checkForEmptyText();
+        }
+    };
+
+
+    public void checkForEmptyText() {
+
+        String titleText = titleEdit.getText().toString();
+        titleText.trim();
+
+        if (titleText.equals("")) {
+            createEventButton.setEnabled(false);
+            createEventButton.setAlpha(.3f);
+        }
+        else {
+            createEventButton.setEnabled(true);
+            createEventButton.setAlpha(1.0f);
+
+        }
+
+
+    }
+
     public CreateEventBottomSheetFragment(OnEventCreationListener listener) {
         super();
         this.listener = listener;
@@ -63,6 +101,9 @@ public class CreateEventBottomSheetFragment extends BottomSheetDialogFragment {
         description = view.findViewById(R.id.description);
         createEventButton = view.findViewById(R.id.createEventButton);
 
+
+        titleEdit.addTextChangedListener(mTextWatcher);
+        checkForEmptyText();
         setupGroupSizePickers(view);
         setupCategoryPicker(view);
 
