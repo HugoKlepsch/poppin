@@ -195,10 +195,6 @@ public class MapsActivity extends FragmentActivity
                             .getLastKnownLocation(locationManager
                                     .getBestProvider(criteria, false));
 
-                    Marker marker = createMarker(
-                            new LatLng(currentLocation.getLatitude(),
-                                    currentLocation.getLongitude()), input);
-
                     Event event = new Event(currentLocation.getLatitude(),
                             currentLocation.getLongitude(), input, new Date(),
                             "Description", // TODO description
@@ -207,7 +203,7 @@ public class MapsActivity extends FragmentActivity
 
                     sendEventToAPI(event);
 
-                    addEvent(marker, event);
+                    addEventToMap(event);
                 } catch (ParseException e) {
                     Log.e("ERROR", "Cannot create due to format parse error");
                 }
@@ -338,17 +334,7 @@ public class MapsActivity extends FragmentActivity
                             for (int i = 0; i < response.length(); i++) {
                                 try {
                                     Event event = new Event((JSONObject) response.get(i));
-
-                                    addEvent(
-                                            createMarker(
-                                                    new LatLng(
-                                                            event.getLatitude(),
-                                                            event.getLongitude()
-                                                    ),
-                                                    event.getTitle()
-                                            ),
-                                            event
-                                    );
+                                    addEventToMap(event);
                                 } catch (ParseException e) {
                                     Log.e("ERROR", "Found event with incorrect date signature");
                                 }
@@ -418,7 +404,15 @@ public class MapsActivity extends FragmentActivity
 
     }
 
-    public void addEvent(Marker marker, Event event) {
+    public void addEventToMap(Event event) {
+        MarkerOptions options = new MarkerOptions()
+                .position(event.getLocation())
+                .title(event.getTitle())
+                .snippet(event.getCategory());
+
+        Marker marker = mMap.addMarker(options);
+        marker.showInfoWindow();
+
         markerMap.put(marker, event);
     }
 
@@ -434,23 +428,15 @@ public class MapsActivity extends FragmentActivity
             Toast.makeText(this, "Clicked Event: " + event.getTitle(),
                     Toast.LENGTH_SHORT).show();
 
-            ViewEventBottomSheetFragment viewEventBottomSheetFragment = new ViewEventBottomSheetFragment();
+            ViewEventBottomSheetFragment viewEventBottomSheetFragment =
+                    new ViewEventBottomSheetFragment();
             viewEventBottomSheetFragment.setArguments(bundle);
-            viewEventBottomSheetFragment.show(getSupportFragmentManager(), viewEventBottomSheetFragment.getTag());
+            viewEventBottomSheetFragment.show(getSupportFragmentManager(),
+                    viewEventBottomSheetFragment.getTag());
 
         }
 
         return true;
-    }
-
-    public Marker createMarker(LatLng latLng, String title) {
-        MarkerOptions options = new MarkerOptions()
-                .position(latLng)
-                .title(title)
-                .snippet("DESCRIPTION");
-        Marker marker =  mMap.addMarker(options);
-        marker.showInfoWindow();
-        return marker;
     }
 
     /**

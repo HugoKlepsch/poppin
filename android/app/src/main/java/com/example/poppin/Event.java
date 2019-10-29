@@ -5,6 +5,8 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,8 +23,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 public class Event implements Serializable {
-    private double latitude;
-    private double longitude;
+    private LatLng location;
     private Date time;
     private String title;
     private String description;
@@ -51,8 +52,7 @@ public class Event implements Serializable {
                  String category, int groupSizeMax, int groupSizeMin) throws ParseException {
         formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        this.setLatitude(lat);
-        this.setLongitude(lon);
+        this.setLocation(new LatLng(lat, lon));
         this.setTitle(title);
         this.setTime(time);
         this.setDescription(description);
@@ -73,8 +73,7 @@ public class Event implements Serializable {
     public Event(JSONObject jsonObj) throws JSONException, ParseException {
         formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        this.latitude = (Double) jsonObj.get("latitude");
-        this.longitude = (Double) jsonObj.get("longitude");
+        this.location = new LatLng((Double) jsonObj.get("latitude"), (Double) jsonObj.get("longitude"));
         this.title = (String) jsonObj.optString("title");
         this.time = formatter.parse((String) jsonObj.optString("time"));
         this.description = (String) jsonObj.optString("description");
@@ -96,8 +95,8 @@ public class Event implements Serializable {
         json = new JSONObject();
 
         try {
-            json.put("latitude", latitude);
-            json.put("longitude", longitude);
+            json.put("latitude", this.getLatitude());
+            json.put("longitude", this.getLongitude());
             json.put("title", title);
             json.put("time", getISOTime());
             json.put("description", description);
@@ -117,18 +116,25 @@ public class Event implements Serializable {
 
     /**
      *
-     * @return
+     * @param location
      */
-    public double getLatitude() {
-        return latitude;
+    public void setLocation(LatLng location) {
+        this.location = location;
     }
 
     /**
      *
-     * @param latitude
      */
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
+    public LatLng getLocation() {
+        return this.location;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public double getLatitude() {
+        return this.location.latitude;
     }
 
     /**
@@ -136,15 +142,7 @@ public class Event implements Serializable {
      * @return
      */
     public double getLongitude() {
-        return longitude;
-    }
-
-    /**
-     *
-     * @param longitude
-     */
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
+        return this.location.longitude;
     }
 
     /**
