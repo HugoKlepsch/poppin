@@ -264,17 +264,17 @@ public class MapsActivity extends FragmentActivity
         List<WeightedLatLng> points = new ArrayList<>();
 
         for (int i = 0; i < numPoints; i++) {
-            double constant = 0.001;
+            double constant = 0.0004;
 
-            double offsetLat = chopDouble(random.nextGaussian() * constant);
-            double offsetLng = chopDouble(random.nextGaussian() * constant);
+            double offsetLat = (random.nextGaussian() * constant);
+            double offsetLng = (random.nextGaussian() * constant);
 
             LatLng newPoint = new LatLng(
                     event.getLatitude() + offsetLat,
                     event.getLongitude() + offsetLng);
 
-            double intensity = event.getHotness() *
-                    (Math.sqrt(Math.pow(offsetLat, 2) + Math.pow(offsetLng, 2)) / constant);
+            double intensity = event.getHotness() * constant /
+                    (Math.sqrt(Math.pow(offsetLat, 2) + Math.pow(offsetLng, 2)));
 
             Log.d("intensity", ": " + intensity);
 
@@ -311,7 +311,7 @@ public class MapsActivity extends FragmentActivity
         };
 
         float[] startPoints = {
-                0.1F, 0.2F, 0.3F, 0.4F, 0.6F, 1.0F
+                0.01F, 0.2F, 0.3F, 0.4F, 0.6F, 1.0F
         };
 
         Gradient gradient = new Gradient(colors, startPoints);
@@ -321,7 +321,7 @@ public class MapsActivity extends FragmentActivity
                 .weightedData(list)
                 .gradient(gradient)
                 .build();
-        mProvider.setRadius(75);
+        mProvider.setRadius(25);
         mOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
     }
 
