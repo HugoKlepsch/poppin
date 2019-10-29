@@ -71,7 +71,7 @@ import java.util.Map;
 public class MapsActivity extends FragmentActivity
         implements
         OnMapReadyCallback,
-        CreateEventFragment.OnInputListener,
+        CreateEventBottomSheetFragment.OnEventCreationListener,
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnCameraIdleListener {
 
@@ -124,8 +124,11 @@ public class MapsActivity extends FragmentActivity
         createEventFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                CreateEventFragment fragment = new CreateEventFragment();
-                fragment.show(mFragmentManager, "Create Event");
+                Bundle bundle = new Bundle();
+                CreateEventBottomSheetFragment createEventBottomSheetFragment =
+                        new CreateEventBottomSheetFragment(MapsActivity.this);
+                createEventBottomSheetFragment.setArguments(bundle);
+                createEventBottomSheetFragment.show(getSupportFragmentManager(), "Create Event");
             }
         });
 
@@ -178,37 +181,25 @@ public class MapsActivity extends FragmentActivity
         }
     }
 
-
-
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void sendInput(String input) {
-        Log.e(TAG, "got the input: " + input);
-        Toast.makeText(this, "Inputted:" + input, Toast.LENGTH_SHORT).show();
-
+    @Override
+    public void onEventCreate(Event event) {
         try {
             if (mLocationPermissionsGranted) {
-                try {
-                    LocationManager locationManager =
-                            (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                    Criteria criteria = new Criteria();
+                LocationManager locationManager =
+                        (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                Criteria criteria = new Criteria();
 
-                    Location currentLocation = locationManager
-                            .getLastKnownLocation(locationManager
-                                    .getBestProvider(criteria, false));
+                Location currentLocation = locationManager
+                        .getLastKnownLocation(locationManager
+                                .getBestProvider(criteria, false));
 
-                    Event event = new Event(currentLocation.getLatitude(),
-                            currentLocation.getLongitude(), input, new Date(),
-                            "Description", // TODO description
-                            "", // TODO category
-                            99, 1); // TODO group size
+                event.setLocation(new LatLng(
+                        currentLocation.getLatitude(),
+                        currentLocation.getLongitude()));
 
-                    sendEventToAPI(event);
+                sendEventToAPI(event);
 
-                    addEventToMap(event);
-                } catch (ParseException e) {
-                    Log.e("ERROR", "Cannot create due to format parse error");
-                }
+                addEventToMap(event);
             }
         } catch (SecurityException e) {
             /* Permissions are not granted - get them */
