@@ -301,14 +301,17 @@ public class MapsActivity extends FragmentActivity
     private void createHeatmap() {
         List<WeightedLatLng> list = generateHeatmapWeightedList();
 
-        // Create the gradient.
         int[] colors = {
-                Color.rgb(102, 225, 0), // green
-                Color.rgb(255, 0, 0)    // red
+                Color.GREEN,    // green(0-50)
+                Color.YELLOW,    // yellow(51-100)
+                Color.rgb(255,165,0), //Orange(101-150)
+                Color.RED,              //red(151-200)
+                Color.rgb(153,50,204), //dark orchid(201-300)
+                Color.rgb(165,42,42) //brown(301-500)
         };
 
         float[] startPoints = {
-                0.2f, 1f
+                0.1F, 0.2F, 0.3F, 0.4F, 0.6F, 1.0F
         };
 
         Gradient gradient = new Gradient(colors, startPoints);
@@ -327,6 +330,8 @@ public class MapsActivity extends FragmentActivity
 
         mProvider.setWeightedData(list);
         mOverlay.clearTileCache();
+
+        //mProvider.setRadius(getRadiusFromZoom(mMap.getCameraPosition().zoom));
     }
 
     /**
@@ -595,7 +600,6 @@ public class MapsActivity extends FragmentActivity
         Log.d(TAG, "Camera Idle, getting events");
         markerMap.clear();
         loadEventsFromAPI();
-        mProvider.setRadius(getRadiusFromZoom(mMap.getCameraPosition().zoom));
     }
 }
 
