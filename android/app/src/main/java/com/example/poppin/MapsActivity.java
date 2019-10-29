@@ -82,8 +82,8 @@ public class MapsActivity extends FragmentActivity
     private byte[] accountId;
     private String accountKeyStoragePath = "account_id";
 
-    // private String mBaseAPIURL = "http://10.0.2.2:1221"; // local dev server
-    private String mBaseAPIURL = "http://poppintest.hugo-klepsch.tech"; // worldwide test server
+    private String mBaseAPIURL = "http://10.0.2.2:1221"; // local dev server
+    //private String mBaseAPIURL = "http://poppintest.hugo-klepsch.tech"; // worldwide test server
 
     private Boolean mLocationPermissionsGranted = false;
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
@@ -92,7 +92,7 @@ public class MapsActivity extends FragmentActivity
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private FragmentManager mFragmentManager = getSupportFragmentManager();
 
-    public Map<Marker, Event> markerMap;
+    public Map<EventMarker, Event> markerMap;
 
     private HeatmapTileProvider mProvider;
     private TileOverlay mOverlay;
@@ -449,15 +449,14 @@ public class MapsActivity extends FragmentActivity
                 .snippet(event.getCategory());
 
         Marker marker = mMap.addMarker(options);
-        marker.showInfoWindow();
 
-        markerMap.put(marker, event);
+        markerMap.put(new EventMarker(marker), event);
     }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
         //Get the model from the hashmap based on the clicked event
-        Event event = markerMap.get(marker);
+        Event event = markerMap.get(new EventMarker(marker));
 
         Bundle bundle = new Bundle();
         bundle.putSerializable("Event", event);
