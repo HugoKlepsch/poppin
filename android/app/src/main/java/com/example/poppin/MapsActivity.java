@@ -426,7 +426,6 @@ public class MapsActivity extends FragmentActivity
             viewEventBottomSheetFragment.setArguments(bundle);
             viewEventBottomSheetFragment.show(getSupportFragmentManager(),
                     viewEventBottomSheetFragment.getTag());
-
         }
 
         return true;

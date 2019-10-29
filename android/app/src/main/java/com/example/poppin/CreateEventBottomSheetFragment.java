@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -24,11 +25,12 @@ import java.util.Date;
 public class CreateEventBottomSheetFragment extends BottomSheetDialogFragment {
 
     private EditText titleEdit;
-    private ImageButton categoryButton;
-    private NumberPicker groupSizeMin, groupSizeMax;
+    private NumberPicker groupSizeMin, groupSizeMax, categorySelect;
     private TextView location, time, category;
     private EditText description;
     private ImageButton createEventButton;
+
+    private String[] categories = {"Fun", "Professional","Party",  "Academic"};
 
     private OnEventCreationListener listener;
 
@@ -54,13 +56,15 @@ public class CreateEventBottomSheetFragment extends BottomSheetDialogFragment {
         Bundle bundle = this.getArguments();
 
         titleEdit = view.findViewById(R.id.event_title);
-        categoryButton = view.findViewById(R.id.chooseCategoryButton);
-        setupGroupSizePickers(view);
+        categorySelect = view.findViewById(R.id.category_picker);
         location = view.findViewById(R.id.location);
         time = view.findViewById(R.id.time);
         category = view.findViewById(R.id.category);
         description = view.findViewById(R.id.description);
         createEventButton = view.findViewById(R.id.createEventButton);
+
+        setupGroupSizePickers(view);
+        setupCategoryPicker(view);
 
         try {
             // Doing this just to get the current local time formatted right.
@@ -82,7 +86,7 @@ public class CreateEventBottomSheetFragment extends BottomSheetDialogFragment {
                             titleEdit.getText().toString(),
                             new Date(), // TODO get the time from user input on this fragment
                             description.getText().toString(),
-                            category.getText().toString(),
+                            categories[categorySelect.getValue()],
                             groupSizeMax.getValue(),
                             groupSizeMin.getValue());
 
@@ -117,6 +121,15 @@ public class CreateEventBottomSheetFragment extends BottomSheetDialogFragment {
         groupSizeMin.setClickable(false);
         groupSizeMax.setLongClickable(false);
         groupSizeMin.setLongClickable(false);
+    }
+
+    private void setupCategoryPicker(View view) {
+        categorySelect.setMinValue(0);
+        categorySelect.setMaxValue(2);
+        categorySelect.setClickable(false);
+        categorySelect.setLongClickable(false);
+        categorySelect.setDisplayedValues(categories);
+
     }
 
     @Nullable
