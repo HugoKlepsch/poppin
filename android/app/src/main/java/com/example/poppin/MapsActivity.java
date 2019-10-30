@@ -75,13 +75,14 @@ public class MapsActivity extends FragmentActivity
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnCameraIdleListener {
 
+
     private static final String TAG = "MapsActivity";
     private GoogleMap mMap;
 
     private byte[] accountId;
     private String accountKeyStoragePath = "account_id";
 
-    // private String mBaseAPIURL = "http://10.0.2.2:1221"; // local dev server
+    //private String mBaseAPIURL = "http://10.0.2.2:1221"; // local dev server
     private String mBaseAPIURL = "http://poppintest.hugo-klepsch.tech"; // worldwide test server
 
     private Boolean mLocationPermissionsGranted = false;
@@ -91,7 +92,7 @@ public class MapsActivity extends FragmentActivity
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private FragmentManager mFragmentManager = getSupportFragmentManager();
 
-    public Map<Marker, Event> markerMap;
+    public Map<EventMarker, Event> markerMap;
 
     private HeatmapTileProvider mProvider;
     private TileOverlay mOverlay;
@@ -251,6 +252,38 @@ public class MapsActivity extends FragmentActivity
         }
     }
 
+    private double chopDouble(double d) {
+        return ((int) (d * 10000)) / 10000.00;
+    }
+
+    private List<WeightedLatLng> generateDemoPoints(Event event) {
+        int numPoints = (int) event.getHotness() * 50;
+        double weight = 1.0;//event.getHotness();
+        Random random = new Random();
+
+        List<WeightedLatLng> points = new ArrayList<>();
+
+        for (int i = 0; i < numPoints; i++) {
+            double constant = 0.0004;
+
+            double offsetLat = (random.nextGaussian() * constant);
+            double offsetLng = (random.nextGaussian() * constant);
+
+            LatLng newPoint = new LatLng(
+                    event.getLatitude() + offsetLat,
+                    event.getLongitude() + offsetLng);
+
+            double intensity = event.getHotness() * constant /
+                    (Math.sqrt(Math.pow(offsetLat, 2) + Math.pow(offsetLng, 2)));
+
+            Log.d("intensity", ": " + intensity);
+
+            points.add(new WeightedLatLng(newPoint, intensity));
+        }
+
+        return points;
+    }
+
     private List<WeightedLatLng> generateHeatmapWeightedList() {
         List<WeightedLatLng> list = new ArrayList<>();
 
@@ -258,8 +291,9 @@ public class MapsActivity extends FragmentActivity
             list.add(new WeightedLatLng(
                     new LatLng(event.getLatitude(), event.getLongitude()),
                     event.getHotness()));
+            list.addAll(generateDemoPoints(event));
         }
-        list.add(new WeightedLatLng(currentLocation, 0.1)); // Can't be empty
+        list.add(new WeightedLatLng(currentLocation, 0.0000001)); // Can't be empty
 
         return list;
     }
@@ -267,14 +301,17 @@ public class MapsActivity extends FragmentActivity
     private void createHeatmap() {
         List<WeightedLatLng> list = generateHeatmapWeightedList();
 
-        // Create the gradient.
         int[] colors = {
-                Color.rgb(102, 225, 0), // green
-                Color.rgb(255, 0, 0)    // red
+                Color.GREEN,    // green(0-50)
+                Color.YELLOW,    // yellow(51-100)
+                Color.rgb(255,165,0), //Orange(101-150)
+                Color.RED,              //red(151-200)
+                Color.rgb(153,50,204), //dark orchid(201-300)
+                Color.rgb(165,42,42) //brown(301-500)
         };
 
         float[] startPoints = {
-                0.2f, 1f
+                0.01F, 0.2F, 0.3F, 0.4F, 0.6F, 1.0F
         };
 
         Gradient gradient = new Gradient(colors, startPoints);
@@ -284,6 +321,7 @@ public class MapsActivity extends FragmentActivity
                 .weightedData(list)
                 .gradient(gradient)
                 .build();
+        mProvider.setRadius(25);
         mOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
     }
 
@@ -292,16 +330,18 @@ public class MapsActivity extends FragmentActivity
 
         mProvider.setWeightedData(list);
         mOverlay.clearTileCache();
+
+        //mProvider.setRadius(getRadiusFromZoom(mMap.getCameraPosition().zoom));
     }
 
     /**
      *
      * @return
      */
-    private void getEvents() {
+    private void loadEventsFromAPI() {
         JSONObject obj = ApplicationNetworkManager.getDefaultAuthenticatedRequest(this.accountId);
 
-        Log.d(TAG, "getEvents start");
+        Log.d(TAG, "loadEventsFromAPI start");
         LatLngBounds curScreen = mMap.getProjection().getVisibleRegion().latLngBounds;
 
         try {
@@ -320,7 +360,7 @@ public class MapsActivity extends FragmentActivity
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        Log.d(TAG, "getEvents onResponse. response: " + response.toString()
+                        Log.d(TAG, "loadEventsFromAPI onResponse. response: " + response.toString()
                                 + " length: " + response.length());
                         try {
 
@@ -334,14 +374,19 @@ public class MapsActivity extends FragmentActivity
                             }
                         } catch (JSONException e) {
                             // ignore
-                            Log.e(TAG, "getEvents json exception" + e.toString());
+                            Log.e(TAG, "loadEventsFromAPI json exception" + e.toString());
                         }
+
+                        if (mProvider == null) {
+                            createHeatmap();
+                        }
+                        updateHeatmap();
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "getEvents error response" + error.toString());
+                        Log.e(TAG, "loadEventsFromAPI error response" + error.toString());
                     }
                 }
         );
@@ -404,23 +449,19 @@ public class MapsActivity extends FragmentActivity
                 .snippet(event.getCategory());
 
         Marker marker = mMap.addMarker(options);
-        marker.showInfoWindow();
 
-        markerMap.put(marker, event);
+        markerMap.put(new EventMarker(marker), event);
     }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
         //Get the model from the hashmap based on the clicked event
-        Event event = markerMap.get(marker);
+        Event event = markerMap.get(new EventMarker(marker));
 
         Bundle bundle = new Bundle();
         bundle.putSerializable("Event", event);
 
         if (event != null) {
-            Toast.makeText(this, "Clicked Event: " + event.getTitle(),
-                    Toast.LENGTH_SHORT).show();
-
             ViewEventBottomSheetFragment viewEventBottomSheetFragment =
                     new ViewEventBottomSheetFragment();
             viewEventBottomSheetFragment.setArguments(bundle);
@@ -446,9 +487,10 @@ public class MapsActivity extends FragmentActivity
         mMap.setOnCameraIdleListener(this);
         Log.d(TAG, "onMapReady: Maps are running with Full Permissions.");
         mMap.setOnMarkerClickListener(this);
-        getEvents();
-        createHeatmap();
-        updateHeatmap();
+
+        // initialize to Null, since it is generated in the following function.
+        mProvider = null;
+        loadEventsFromAPI();
 
         if (mLocationPermissionsGranted) {
             setUserLocation();
@@ -456,10 +498,13 @@ public class MapsActivity extends FragmentActivity
         }
     }
 
+
+
     private void moveCamera(LatLng latLng, float zoom) {
         Log.d(TAG, "moveCamera: moving camera to location -> latitude:"
                         + latLng.latitude  + " ," + latLng.longitude );
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+
     }
 
     private void setUserLocation() {
@@ -531,13 +576,25 @@ public class MapsActivity extends FragmentActivity
         }
     }
 
+    /**
+     *
+     * @param zoom
+     * @return
+     */
+    private int getRadiusFromZoom(float zoom) {
+        int radius = (int) (zoom * 10);
+        Log.d("Zoom", "zoom: radius = " + zoom + ": " + radius);
+        return radius;
+    }
+
+    /**
+     *
+     */
     @Override
     public void onCameraIdle() {
         Log.d(TAG, "Camera Idle, getting events");
         markerMap.clear();
-        mMap.clear();
-        getEvents();
-        updateHeatmap();
+        loadEventsFromAPI();
     }
 }
 
