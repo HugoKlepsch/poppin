@@ -462,9 +462,6 @@ public class MapsActivity extends FragmentActivity
         bundle.putSerializable("Event", event);
 
         if (event != null) {
-            Toast.makeText(this, "Clicked Event: " + event.getTitle(),
-                    Toast.LENGTH_SHORT).show();
-
             ViewEventBottomSheetFragment viewEventBottomSheetFragment =
                     new ViewEventBottomSheetFragment();
             viewEventBottomSheetFragment.setArguments(bundle);
