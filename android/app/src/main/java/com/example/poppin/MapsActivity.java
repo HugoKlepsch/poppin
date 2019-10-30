@@ -82,8 +82,8 @@ public class MapsActivity extends FragmentActivity
     private byte[] accountId;
     private String accountKeyStoragePath = "account_id";
 
-    private String mBaseAPIURL = "http://10.0.2.2:1221"; // local dev server
-    //private String mBaseAPIURL = "http://poppintest.hugo-klepsch.tech"; // worldwide test server
+    //private String mBaseAPIURL = "http://10.0.2.2:1221"; // local dev server
+    private String mBaseAPIURL = "http://poppintest.hugo-klepsch.tech"; // worldwide test server
 
     private Boolean mLocationPermissionsGranted = false;
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
