@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 public class Event implements Serializable {
+    private Long id;
     private LatLng location;
     private Date time;
     private String title;
@@ -52,6 +53,7 @@ public class Event implements Serializable {
                  String category, int groupSizeMax, int groupSizeMin) throws ParseException {
         formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
+        this.id = null;
         this.setLocation(new LatLng(lat, lon));
         this.setTitle(title);
         this.setTime(time);
@@ -73,6 +75,7 @@ public class Event implements Serializable {
     public Event(JSONObject jsonObj) throws JSONException, ParseException {
         formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
+        this.id = (Long) jsonObj.get("id");
         this.location = new LatLng((Double) jsonObj.get("latitude"), (Double) jsonObj.get("longitude"));
         this.title = (String) jsonObj.optString("title");
         this.time = formatter.parse((String) jsonObj.optString("time"));
@@ -95,6 +98,9 @@ public class Event implements Serializable {
         json = new JSONObject();
 
         try {
+            if (id != null) {
+                json.put("id", this.getId());
+            }
             json.put("latitude", this.getLatitude());
             json.put("longitude", this.getLongitude());
             json.put("title", title);
@@ -303,5 +309,28 @@ public class Event implements Serializable {
     }
 
 
+    /**
+     *
+     * @return
+     */
+    public Long getId() {
+        return this.id;
+    }
+
+    /**
+     *
+     * @param id
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    /**
+     *
+     * @param id
+     */
+    public void setId(long id) {
+        this.id = Long.valueOf(id);
+    }
 
 }
