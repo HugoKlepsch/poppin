@@ -13,9 +13,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from webargs.flaskparser import use_args
 
 from api_src.db import DB
-from api_src.models import Account, Event
+from api_src.models import Account, Event, Hype
 from api_src.models import AccountSchemaOut
 from api_src.models import EventSchemaIn, EventSchemaOut, EventQueryByLocationSchema
+from api_src.models import HypeSchemaIn
 from api_src.models import AuthenticatedMessageSchema
 from api_src.schema import JSON_CT, INTERNAL_SERVER_ERROR_JSON_RESPONSE, ok_response
 from api_src.schema import JsonApiSchema
@@ -151,6 +152,9 @@ def calculate_event_hotness(event):
     :rtype: Event
     """
 
+    # we need the "HYPE" for each event before we can calculate hotness.
+    retrieve_event_hype(event)
+
     def _calculate_event_hotness(event):
         # TODO actually calculate things like sqrt(event.checkins) + 0.4sqrt(event.hypes)
         _event = event  # TODO
@@ -161,6 +165,28 @@ def calculate_event_hotness(event):
             element.hotness = _calculate_event_hotness(element)
     else:
         event.hotness = _calculate_event_hotness(event)
+    return event
+
+
+def retrieve_event_hype(event):
+    """
+    Retrieve the hype entries for a particular event, and enter it as a `hype` key
+    in the event dictionary.
+    """
+
+    def _retrieve_event_hype(_event):
+        event_id = _event.id
+        try:
+            return Hype.query.filter_by(event_id=event_id).count()
+        except SQLAlchemyError as exception:
+            APP.logger.exception("Failed to get hype for event: %s", exception)
+            return None
+
+    if isinstance(event, list):
+        for element in event:
+            element.hype = _retrieve_event_hype(element)
+    else:
+        event.hype = _retrieve_event_hype(event)
     return event
 
 
@@ -272,6 +298,33 @@ def create_event(event_data):
     except SQLAlchemyError as exception:
         APP.logger.exception('Failed to create event: %s', exception)
         return INTERNAL_SERVER_ERROR_JSON_RESPONSE
+
+
+@APP.route('/api/hype/by_id', methods=['POST'])
+@use_args(HypeSchemaIn())
+@authenticated()
+@marshal_with(JsonApiSchema())
+def hype_event(hype_data):
+    """Endpoint for hyping an event; creates a new Hype entry"""
+    device_key = hype_data.get('device_key', None)
+    event_id = hype_data.get('event_id', None)
+
+    try:
+        account = Account.query.filter_by(device_key=device_key).first()
+
+        if Hype.query.filter_by(account_id=account.id, event_id=event_id).count() > 0:
+            return {'msg': 'Cannot hype an event again.'}, 409, JSON_CT
+
+        hype = Hype(account_id=account.id, event_id=event_id)
+        DB.session.add(hype)
+        DB.session.commit()
+        return ok_response('Successfully hyped event %d' % (event_id))
+
+    except SQLAlchemyError as exception:
+        APP.logger.exception("Failed to hype event: %s", exception)
+        return INTERNAL_SERVER_ERROR_JSON_RESPONSE
+
+
 
 
 @APP.route('/', methods=['GET'])

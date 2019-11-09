@@ -28,6 +28,26 @@ class Event(DB.Model):
     category = DB.Column(DB.String(50), nullable=False)
     description = DB.Column(DB.String(140), nullable=False)
 
+
+class Hype(DB.Model):
+    """Hype database model"""
+    __tablename__ = 'hypes'
+    id = DB.Column(DB.Integer, nullable=False, autoincrement=True, primary_key=True)
+    event_id = DB.Column(DB.Integer, DB.ForeignKey(Event.__tablename__ + '.id'), nullable=False)
+    account_id = DB.Column(DB.Integer, DB.ForeignKey(Account.__tablename__ + '.id'), nullable=False)
+    __table_args__ = (DB.UniqueConstraint('event_id', 'account_id', name='_event_account_unique_constraint'),)
+
+
+class HypeSchemaIn(AuthenticatedMessageSchema):
+    """The input marshmallow schema for hype requests"""
+    event_id = fields.Integer()
+
+
+class HypeSchemaOut(JsonApiSchema):
+    """The output schema for get Hype requests"""
+    count = fields.Integer()
+
+
 class EventSchemaIn(AuthenticatedMessageSchema):
     """Event marshmallow schema"""
     latitude = fields.Float()
@@ -62,6 +82,7 @@ class EventSchemaOut(JsonApiSchema):
     title = fields.String()
     category = fields.String()
     description = fields.String()
+    hype = fields.Integer()
 
 
 class AccountSchemaOut(JsonApiSchema):
