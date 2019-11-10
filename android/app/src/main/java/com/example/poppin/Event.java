@@ -31,7 +31,7 @@ public class Event implements Serializable {
     private String category;
     private int recommendedGroupSizeMin;
     private int recommendedGroupSizeMax;
-
+    private boolean isCheckedIn;
 
     final static private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");;
 
@@ -66,6 +66,9 @@ public class Event implements Serializable {
 
         this.setCheckins(100);
         this.setHype(100);
+
+        /* TODO: This Stub code. Currently the server is not handling this. We wil do it locally */
+        this.isCheckedIn = false;
         this.wasHyped = false;
     }
 
@@ -312,6 +315,19 @@ public class Event implements Serializable {
         return recommendedGroupSizeMax;
     }
 
+    /**
+     * @return
+     */
+    public void setIsCheckedIn(boolean isCheckedIn) {
+        this.isCheckedIn =  isCheckedIn;
+    }
+
+    /**
+     * @return
+     */
+    public Boolean getIsCheckedIn() {
+        return isCheckedIn;
+    }
 
     /**
      *

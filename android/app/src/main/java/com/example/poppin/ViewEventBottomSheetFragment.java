@@ -1,5 +1,6 @@
 package com.example.poppin;
 
+import android.graphics.Color;
 import android.location.Geocoder;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,8 +28,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.time.temporal.TemporalField;
-import java.util.Date;
 
 import static com.android.volley.VolleyLog.TAG;
 
@@ -43,6 +42,8 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
     private TextView locationView;
     private TextView txtGroupSize;
     private Button hypeButton;
+    private ImageView imgGroupSize;
+    private Button btnCheckin;
 
 
     public ViewEventBottomSheetFragment() {
@@ -79,10 +80,21 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         categoryView = view.findViewById(R.id.category);
         categoryView.setText(event.getCategory());
 
+
+
         descriptionView = view.findViewById(R.id.description);
         descriptionView.setText(event.getDescription());
 
         locationView = view.findViewById(R.id.location);
+
+
+        btnCheckin = view.findViewById(R.id.checkin);
+
+        if (event.getIsCheckedIn()) {
+                setCheckedInButton();
+        }
+
+
         try {
             locationView.setText(
                     geocoder.getFromLocation(
@@ -154,7 +166,25 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
             }
         });
 
+        btnCheckin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                        setCheckedInButton();
+
+                    /* TODO: Update Server: Blocked by -> MUST-9 API must have an endpoint to check-in to an event
+                    * */
+            }
+        });
+
         super.onViewCreated(view, savedInstanceState);
+    }
+
+    private void setCheckedInButton() {
+        btnCheckin.setText("Checked in");
+        btnCheckin.setTextColor(Color.BLACK);
+        btnCheckin.setEnabled(false);
+        btnCheckin.setAlpha(.3f);
     }
 
     @Nullable
