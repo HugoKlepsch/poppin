@@ -82,7 +82,7 @@ public class MapsActivity extends FragmentActivity
     private byte[] accountId;
     private String accountKeyStoragePath = "account_id";
 
-    private String mBaseAPIURL = "http://10.0.2.2:1221"; // local dev server
+    //private String mBaseAPIURL = "http://10.0.2.2:1221"; // local dev server
     //private String mBaseAPIURL = "http://poppintest.hugo-klepsch.tech"; // worldwide test server
 
     private Boolean mLocationPermissionsGranted = false;
@@ -107,6 +107,7 @@ public class MapsActivity extends FragmentActivity
         setContentView(R.layout.activity_maps);
 
         loadAccountCredentials();
+        ApplicationNetworkManager.initialize(this.getApplicationContext(), this.accountId);
 
         markerMap = new HashMap<>();
 
@@ -339,7 +340,7 @@ public class MapsActivity extends FragmentActivity
      * @return
      */
     private void loadEventsFromAPI() {
-        JSONObject obj = ApplicationNetworkManager.getDefaultAuthenticatedRequest(this.accountId);
+        JSONObject obj = ApplicationNetworkManager.getDefaultAuthenticatedRequest();
 
         Log.d(TAG, "loadEventsFromAPI start");
         LatLngBounds curScreen = mMap.getProjection().getVisibleRegion().latLngBounds;
@@ -355,9 +356,10 @@ public class MapsActivity extends FragmentActivity
 
         JsonRequest request = new JsonObjectArrayRequest(
                 Request.Method.POST,
-                mBaseAPIURL + "/api/events/by_location",
+                ApplicationNetworkManager.baseAPIURL + "/api/events/by_location",
                 obj,
                 new Response.Listener<JSONArray>() {
+                    @RequiresApi(api = Build.VERSION_CODES.O)
                     @Override
                     public void onResponse(JSONArray response) {
                         Log.d(TAG, "loadEventsFromAPI onResponse. response: " + response.toString()
@@ -392,12 +394,12 @@ public class MapsActivity extends FragmentActivity
         );
 
         ApplicationNetworkManager
-                .getInstance(this.getApplicationContext())
+                .getExistingInstance()
                 .addToRequestQueue(request);
     }
 
     public void sendEventToAPI(Event event) {
-        JSONObject obj = ApplicationNetworkManager.getDefaultAuthenticatedRequest(this.accountId);
+        JSONObject obj = ApplicationNetworkManager.getDefaultAuthenticatedRequest();
 
         Log.d(TAG, "sendEventToAPI start");
 
@@ -419,7 +421,7 @@ public class MapsActivity extends FragmentActivity
 
         JsonRequest request = new JsonObjectRequest(
                 Request.Method.POST,
-                mBaseAPIURL + "/api/event",
+                ApplicationNetworkManager.baseAPIURL + "/api/event",
                 obj,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -437,7 +439,7 @@ public class MapsActivity extends FragmentActivity
         );
 
         ApplicationNetworkManager
-                .getInstance(this.getApplicationContext())
+                .getExistingInstance()
                 .addToRequestQueue(request);
 
     }

@@ -29,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-
         /* before anything, check to see if we can connect to google */
         /* TODO: We can also have the connect to our severs here,
             as a blocker to showing the map, or not ? */

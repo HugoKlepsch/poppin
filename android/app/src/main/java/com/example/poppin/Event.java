@@ -37,6 +37,7 @@ public class Event implements Serializable {
 
     private int checkins;
     private int hype;
+    private boolean wasHyped;
 
     private double hotness;
 
@@ -65,6 +66,7 @@ public class Event implements Serializable {
 
         this.setCheckins(100);
         this.setHype(100);
+        this.wasHyped = false;
     }
 
 
@@ -87,6 +89,7 @@ public class Event implements Serializable {
         this.hotness = jsonObj.optDouble("hotness");
         this.recommendedGroupSizeMax = jsonObj.getInt("group_size_max");
         this.recommendedGroupSizeMin = jsonObj.getInt("group_size_min");
+        this.wasHyped = (Boolean) jsonObj.get("was_hyped");
     }
 
     /**
@@ -334,4 +337,11 @@ public class Event implements Serializable {
         this.id = Long.valueOf(id);
     }
 
+    public void setWasHyped(boolean wasHyped) {
+        this.wasHyped = wasHyped;
+    }
+
+    public boolean wasHyped() {
+        return this.wasHyped;
+    }
 }

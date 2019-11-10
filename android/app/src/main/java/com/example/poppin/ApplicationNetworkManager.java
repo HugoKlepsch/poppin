@@ -17,18 +17,21 @@ public class ApplicationNetworkManager {
     private static ApplicationNetworkManager instance;
     private RequestQueue requestQueue;
     private static Context applicationContext;
+    private byte[] accountID;
+    final public static String baseAPIURL = "http://10.0.2.2:1221"; // local dev server
 
-    private ApplicationNetworkManager(Context ctx) {
+    private ApplicationNetworkManager(Context ctx, byte[] aID) {
         applicationContext = ctx;
         requestQueue = getRequestQueue();
+        this.accountID = aID;
     }
 
-    public static JSONObject getDefaultAuthenticatedRequest(byte[] accountID) {
+    public static JSONObject getDefaultAuthenticatedRequest() {
         JSONObject defaultObject;
         defaultObject = new JSONObject();
 
         try {
-            defaultObject.put("device_key", accountID);
+            defaultObject.put("device_key", instance.accountID);
         } catch (JSONException e) {
             return null;
         }
@@ -36,11 +39,27 @@ public class ApplicationNetworkManager {
         return defaultObject;
     }
 
-    public static synchronized ApplicationNetworkManager getInstance(Context context) {
+    public static void initialize(Context context, byte[] accountID) {
         if (instance == null) {
-            instance = new ApplicationNetworkManager(context);
+            instance = new ApplicationNetworkManager(context, accountID);
+        }
+    }
+
+    public static synchronized ApplicationNetworkManager getInstance(Context context, byte[] accountID) {
+        if (instance == null) {
+            if (accountID == null) {
+                throw new NullPointerException();
+            }
+            instance = new ApplicationNetworkManager(context, accountID);
         }
 
+        return instance;
+    }
+
+    public static synchronized ApplicationNetworkManager getExistingInstance() {
+        if (instance == null) {
+            throw new NullPointerException();
+        }
         return instance;
     }
 

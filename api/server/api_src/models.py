@@ -84,6 +84,7 @@ class EventSchemaOut(JsonApiSchema):
     description = fields.String()
     hype = fields.Integer()
     checkins = fields.Integer()
+    was_hyped = fields.Boolean()
 
 
 class AccountSchemaOut(JsonApiSchema):
