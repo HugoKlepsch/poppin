@@ -405,7 +405,6 @@ def hype_event(hype_data):
 
 
 
-
 @APP.route('/', methods=['GET'])
 def health_check():
     """Health check endpoint"""
