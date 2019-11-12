@@ -254,9 +254,9 @@ def calculate_event_hype(event):
 
     if isinstance(event, list):
         for element in event:
-            element.hype = _retrieve_event_hype(element)
+            element.hype = _calculate_event_hype(element)
     else:
-        event.hype = _retrieve_event_hype(event)
+        event.hype = _calculate_event_hype(event)
     return event
 
 
