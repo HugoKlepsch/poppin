@@ -198,15 +198,44 @@ def calculate_event_checkins(event):
     in the event dictionary.
     """
 
-    def _retrieve_event_checkins(_event):
+    def _calculate_event_checkins(_event):
         return 1  # TODO
 
     if isinstance(event, list):
         for element in event:
-            element.checkins = _retrieve_event_checkins(element)
+            element.checkins = _calculate_event_checkins(element)
     else:
-        event.checkins = _retrieve_event_checkins(event)
+        event.checkins = _calculate_event_checkins(event)
     return event
+
+
+def set_was_hyped_by_user(event, device_key):
+    """
+    Check the database to see if the event in question was hyped by this device key
+    before.  If so, set event->was_hyped to true; otherwise false.
+    """
+
+    def _set_was_hyped_by_user(_event, _device_key):
+        event_id = _event.id
+        try:
+            account_id = Account.query.filter_by(device_key=_device_key).first().id
+
+            # check if there exists a record of this account hyping this event.
+            was_hyped = Hype.query.filter_by(account_id=account_id, event_id=event_id).count()
+            return bool(was_hyped)
+
+        except SQLAlchemyError as exception:
+            APP.logger.exception("Failed to retrieve hype record: %s", exception)
+            return None
+
+
+    if isinstance(event, list):
+        for element in event:
+            element.was_hyped = _set_was_hyped_by_user(element, device_key)
+    else:
+        event.was_hyped = _set_was_hyped_by_user(event, device_key)
+    return event
+
 
 
 def calculate_event_hype(event):
@@ -215,7 +244,7 @@ def calculate_event_hype(event):
     in the event dictionary.
     """
 
-    def _retrieve_event_hype(_event):
+    def _calculate_event_hype(_event):
         event_id = _event.id
         try:
             return Hype.query.filter_by(event_id=event_id).count()
@@ -225,9 +254,9 @@ def calculate_event_hype(event):
 
     if isinstance(event, list):
         for element in event:
-            element.hype = _retrieve_event_hype(element)
+            element.hype = _calculate_event_hype(element)
     else:
-        event.hype = _retrieve_event_hype(event)
+        event.hype = _calculate_event_hype(event)
     return event
 
 
@@ -264,7 +293,7 @@ def events_for_area(payload):
     except (KeyError, ValueError):
         return [{'msg': 'Bad request'}], 400, JSON_CT
 
-    return calculate_event_hotness(Event.query.filter(
+    events = Event.query.filter(
         and_(
             and_(
                 Event.latitude >= latitude_sw,
@@ -275,7 +304,12 @@ def events_for_area(payload):
                 Event.longitude < longitude_ne
             )
         )
-    ).all() or [])
+    ).all() or []
+
+    calculate_event_hotness(events)
+    set_was_hyped_by_user(events, payload['device_key'])
+
+    return events
 
 
 @APP.route('/api/events/by_device_key', methods=['POST'])
@@ -292,7 +326,11 @@ def events_for_account_id(payload):
     device_key = payload['device_key'] or ''
     account = Account.query.filter_by(device_key=device_key).first()
     if account:
-        return calculate_event_hotness(Event.query.filter_by(account_id=account.id).all() or [])
+        events = Event.query.filter_by(account_id=account.id).all() or []
+        calculate_event_hotness(events)
+        set_was_hyped_by_user(events, payload['device_key'])
+
+        return events
     return []
 
 
@@ -314,7 +352,6 @@ def create_event(event_data):
     time = event_data.get('time', None)
     description = event_data.get('description', None)
     category = event_data.get('category', None)
-
 
     group_size_min = event_data.get('group_size_min', None)
     group_size_max = event_data.get('group_size_max', None)
@@ -341,6 +378,7 @@ def create_event(event_data):
         return INTERNAL_SERVER_ERROR_JSON_RESPONSE
 
 
+
 @APP.route('/api/hype/by_id', methods=['POST'])
 @use_args(HypeSchemaIn())
 @authenticated()
@@ -364,7 +402,6 @@ def hype_event(hype_data):
     except SQLAlchemyError as exception:
         APP.logger.exception("Failed to hype event: %s", exception)
         return INTERNAL_SERVER_ERROR_JSON_RESPONSE
-
 
 
 

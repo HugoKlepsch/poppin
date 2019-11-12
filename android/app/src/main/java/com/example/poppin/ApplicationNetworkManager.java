@@ -17,18 +17,20 @@ public class ApplicationNetworkManager {
     private static ApplicationNetworkManager instance;
     private RequestQueue requestQueue;
     private static Context applicationContext;
+    final public static String baseAPIURL = "http://10.0.2.2:1221"; // local dev server
+    //final private String baseAPIURL = "http://poppintest.hugo-klepsch.tech"; // worldwide test server
 
-    private ApplicationNetworkManager(Context ctx) {
-        applicationContext = ctx;
+    private ApplicationNetworkManager(Context context) {
+        applicationContext = context;
         requestQueue = getRequestQueue();
     }
 
-    public static JSONObject getDefaultAuthenticatedRequest(byte[] accountID) {
+    public static JSONObject getDefaultAuthenticatedRequest(byte[] deviceKey) {
         JSONObject defaultObject;
         defaultObject = new JSONObject();
 
         try {
-            defaultObject.put("device_key", accountID);
+            defaultObject.put("device_key", deviceKey);
         } catch (JSONException e) {
             return null;
         }
@@ -40,7 +42,6 @@ public class ApplicationNetworkManager {
         if (instance == null) {
             instance = new ApplicationNetworkManager(context);
         }
-
         return instance;
     }
 
