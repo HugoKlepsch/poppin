@@ -17,6 +17,7 @@ from api_src.models import Account, Event, Hype
 from api_src.models import AccountSchemaOut
 from api_src.models import EventSchemaIn, EventSchemaOut, EventQueryByLocationSchema
 from api_src.models import HypeSchemaIn
+from api_src.models import Checkin
 from api_src.models import AuthenticatedMessageSchema
 from api_src.schema import JSON_CT, INTERNAL_SERVER_ERROR_JSON_RESPONSE, ok_response
 from api_src.schema import JsonApiSchema
@@ -51,6 +52,33 @@ def create_app():  # {{{
 
     return _app
 # }}}
+
+
+def set_was_checkedin_by_user(event, device_key):# {{{
+    """
+        Given an event, check to see if it was been checked into for a user.
+     """
+
+    def _set_was_checkedin_by_user(_event, _device_key):
+        event_id = _event.id
+        try:
+            account_id = Account.query.filter_by(device_key=_device_key).first().id
+
+            was_checkedin = Checkin.query.filter_by(account_id=account_id, event_id=event_id).count()
+            return was_checkedin
+
+        except SQLAlchemyError as exception:
+            APP.logger.exception("Failed to retrieve hype record: %s", exception)
+            return None
+
+    if isinstance(event, list):
+        for element in event:
+            element.was_checkedin = _set_was_checkedin_by_user(element, device_key)
+
+    else:
+        event.was_checkedin = _set_was_checkedin_by_user(event, device_key)
+
+    return event
 
 
 def setup_database(_app):  # {{{
@@ -199,7 +227,12 @@ def calculate_event_checkins(event):
     """
 
     def _calculate_event_checkins(_event):
-        return 1  # TODO
+        event_id = _event.id
+        try:
+            return Checkin.query.filter_by(event_id=event_id).count()
+        except SQLAlchemyError as exception:
+            APP.logger.exception("Failed to get hype for event: %s", exception)
+            return None
 
     if isinstance(event, list):
         for element in event:
