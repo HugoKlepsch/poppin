@@ -61,7 +61,7 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Bundle bundle = this.getArguments();
-        Geocoder geocoder = new Geocoder(getContext());
+        Geocoder geocoder = new Geocoder(getContext().getApplicationContext());
 
         final Event event = (Event)bundle.getSerializable("Event");
         titleView = view.findViewById(R.id.event_title);
@@ -115,7 +115,7 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
             @Override
             public void onClick(View v) {
                 JSONObject obj = ApplicationNetworkManager
-                        .getDefaultAuthenticatedRequest(DeviceKey.getDeviceKey(getContext()));
+                        .getDefaultAuthenticatedRequest(DeviceKey.getDeviceKey(getContext().getApplicationContext()));
                 try {
                     obj.put("event_id", event.getId());
                 } catch (JSONException e) {
@@ -135,6 +135,8 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                                                 + response.toString()
                                                 + " length: " + response.length());
                                 event.setWasHyped(true);
+                                event.setHype(event.getHype() + 1);
+                                hypeView.setText(Integer.toString(event.getHype()));
                                 hypeButton.setEnabled(false);
                             }
                         },
@@ -147,7 +149,7 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                 );
 
                 ApplicationNetworkManager
-                        .getInstance(getContext())
+                        .getInstance(getContext().getApplicationContext())
                         .addToRequestQueue(request);
             }
         });
