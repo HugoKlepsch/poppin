@@ -62,12 +62,20 @@ def setup_database(_app):  # {{{
         DB.session.commit()
         _app.logger.info('Created databases')
 
-        example_account = Account.query.filter_by(device_key='testaccount').first()
+        example_account = Account.query.filter_by(device_key='exampleaccount').first()
         if example_account is None:
-            _app.logger.info('Creating test account')
-            example_account = Account(device_key='testaccount')
+            _app.logger.info('Creating example account')
+            example_account = Account(device_key='exampleaccount')
             DB.session.add(example_account)
             DB.session.commit()
+
+        test_accounts = [Account()] * 5  # five test accounts
+        for i, _ in enumerate(test_accounts):
+            test_accounts[i] = Account.query.filter_by(device_key='testaccount{i}'.format(i=i)).first()
+            if test_accounts[i] is None:
+                test_accounts[i] = Account(device_key='testaccount{i}'.format(i=i))
+                DB.session.add(test_accounts[i])
+                DB.session.commit()
 
         example_event = Event.query.filter_by(account_id=example_account.id).first()
         if example_event is None:
@@ -76,18 +84,35 @@ def setup_database(_app):  # {{{
             example_event = Event(account_id=example_account.id, latitude=32.079663, longitude=34.775528,
                                   group_size_max=3, group_size_min=1, title="Isreal is real",
                                   category="Social", time=datetime.datetime.utcnow(),
-                                  description="Let us come together in peace")
+                                  description="Let us come together in peace. 3 hypes")
             DB.session.add(example_event)
+            DB.session.commit()
+            for i in range(3):
+                DB.session.add(Hype(account_id=test_accounts[i].id, event_id=example_event.id))
+
             example_event_two = Event(account_id=example_account.id, latitude=43.545199, longitude=-80.246926,
                                       group_size_max=5, group_size_min=3, title="Trappers halloween costume party",
                                       category="Social drinking", time=datetime.datetime.utcnow(),
-                                      description="BYOB costume party. Hawaiian theme.")
+                                      description="BYOB costume party. Hawaiian theme. 5 hypes")
             DB.session.add(example_event_two)
+            DB.session.commit()
+            for i in range(5):
+                DB.session.add(Hype(account_id=test_accounts[i].id, event_id=example_event_two.id))
+
             example_event_three = Event(account_id=example_account.id, latitude=43.530793, longitude=-80.229077,
                                         group_size_max=1, group_size_min=1, title="LAN party in Reynolds!",
                                         category="Sports", time=datetime.datetime.utcnow(),
-                                        description="Bring a laptop and Halo CE for the LAN party")
+                                        description="Bring a laptop and Halo CE for the LAN party. 3 hypes")
             DB.session.add(example_event_three)
+            DB.session.commit()
+            for i in range(3):
+                DB.session.add(Hype(account_id=test_accounts[i].id, event_id=example_event_three.id))
+
+            example_event_four = Event(account_id=example_account.id, latitude=43.531793, longitude=-80.228077,
+                                       group_size_max=1, group_size_min=1, title="Vapers anonymous",
+                                       category="Social", time=datetime.datetime.utcnow(),
+                                       description="0 hypes")
+            DB.session.add(example_event_four)
             DB.session.commit()
 
         _app.logger.info('Created test account and events')
@@ -153,12 +178,11 @@ def calculate_event_hotness(event):
     """
 
     # we need the "HYPE" for each event before we can calculate hotness.
-    retrieve_event_hype(event)
+    calculate_event_hype(event)
+    calculate_event_checkins(event)
 
-    def _calculate_event_hotness(event):
-        # TODO actually calculate things like sqrt(event.checkins) + 0.4sqrt(event.hypes)
-        _event = event  # TODO
-        return 5.0
+    def _calculate_event_hotness(_event):
+        return (_event.hype ** 0.9) + (_event.checkins ** 0.9)
 
     if isinstance(event, list):
         for element in event:
@@ -168,7 +192,24 @@ def calculate_event_hotness(event):
     return event
 
 
-def retrieve_event_hype(event):
+def calculate_event_checkins(event):
+    """
+    Retrieve the number of checkins for a particular event, and enter it as a `checkins` key
+    in the event dictionary.
+    """
+
+    def _retrieve_event_checkins(_event):
+        return 1  # TODO
+
+    if isinstance(event, list):
+        for element in event:
+            element.checkins = _retrieve_event_checkins(element)
+    else:
+        event.checkins = _retrieve_event_checkins(event)
+    return event
+
+
+def calculate_event_hype(event):
     """
     Retrieve the hype entries for a particular event, and enter it as a `hype` key
     in the event dictionary.
