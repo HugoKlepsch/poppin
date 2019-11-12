@@ -23,6 +23,8 @@ import java.util.Date;
 public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
 
     private TextView titleView;
+    private TextView checkinsView;
+    private TextView hypeView;
     private TextView categoryView;
     private TextView timeView;
     private TextView descriptionView;
@@ -53,6 +55,12 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         Event event = (Event)bundle.getSerializable("Event");
         titleView = view.findViewById(R.id.event_title);
         titleView.setText(event.getTitle());
+
+        checkinsView = view.findViewById(R.id.checkins);
+        checkinsView.setText(Integer.toString(event.getCheckins()));
+
+        hypeView = view.findViewById(R.id.hypes);
+        hypeView.setText(Integer.toString(event.getHype()));
 
         timeView = view.findViewById(R.id.time);
         timeView.setText(event.getLocalTime());

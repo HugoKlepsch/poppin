@@ -72,20 +72,21 @@ public class Event implements Serializable {
      *
      * @param jsonObj
      */
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public Event(JSONObject jsonObj) throws JSONException, ParseException {
         formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        this.id = (Long) jsonObj.get("id");
-        this.location = new LatLng((Double) jsonObj.get("latitude"), (Double) jsonObj.get("longitude"));
-        this.title = (String) jsonObj.optString("title");
-        this.time = formatter.parse((String) jsonObj.optString("time"));
-        this.description = (String) jsonObj.optString("description");
-        this.category = (String) jsonObj.optString("category");
-        this.checkins = (Integer) jsonObj.optInt("checkins");
-        this.hype = (Integer) jsonObj.optInt("hype");
-        this.hotness = (Double) jsonObj.optDouble("hotness");
-        this.recommendedGroupSizeMax = (Integer) jsonObj.get("group_size_max");
-        this.recommendedGroupSizeMin = (Integer) jsonObj.get("group_size_min");
+        this.id = Integer.toUnsignedLong(jsonObj.getInt("id"));
+        this.location = new LatLng(jsonObj.getDouble("latitude"), jsonObj.getDouble("longitude"));
+        this.title = jsonObj.optString("title");
+        this.time = formatter.parse(jsonObj.optString("time"));
+        this.description = jsonObj.optString("description");
+        this.category = jsonObj.optString("category");
+        this.checkins = jsonObj.optInt("checkins");
+        this.hype = jsonObj.optInt("hype");
+        this.hotness = jsonObj.optDouble("hotness");
+        this.recommendedGroupSizeMax = jsonObj.getInt("group_size_max");
+        this.recommendedGroupSizeMin = jsonObj.getInt("group_size_min");
     }
 
     /**

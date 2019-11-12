@@ -83,6 +83,7 @@ class EventSchemaOut(JsonApiSchema):
     category = fields.String()
     description = fields.String()
     hype = fields.Integer()
+    checkins = fields.Integer()
 
 
 class AccountSchemaOut(JsonApiSchema):

@@ -311,7 +311,7 @@ public class MapsActivity extends FragmentActivity
         };
 
         float[] startPoints = {
-                0.01F, 0.2F, 0.3F, 0.4F, 0.6F, 1.0F
+                0.09F, 0.2F, 0.3F, 0.4F, 0.5F, 0.7F
         };
 
         Gradient gradient = new Gradient(colors, startPoints);
