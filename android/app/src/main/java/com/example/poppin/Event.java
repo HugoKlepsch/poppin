@@ -89,7 +89,7 @@ public class Event implements Serializable {
         this.hotness = jsonObj.optDouble("hotness");
         this.recommendedGroupSizeMax = jsonObj.getInt("group_size_max");
         this.recommendedGroupSizeMin = jsonObj.getInt("group_size_min");
-        this.wasHyped = (Boolean) jsonObj.get("was_hyped");
+        this.wasHyped = jsonObj.has("was_hyped") && jsonObj.getBoolean("was_hyped");
     }
 
     /**

@@ -222,7 +222,7 @@ def set_was_hyped_by_user(event, device_key):
 
             # check if there exists a record of this account hyping this event.
             was_hyped = Hype.query.filter_by(account_id=account_id, event_id=event_id).count()
-            return was_hyped
+            return bool(was_hyped)
 
         except SQLAlchemyError as exception:
             APP.logger.exception("Failed to retrieve hype record: %s", exception)
@@ -293,19 +293,23 @@ def events_for_area(payload):
     except (KeyError, ValueError):
         return [{'msg': 'Bad request'}], 400, JSON_CT
 
-    return set_was_hyped_by_user(
-        calculate_event_hotness(Event.query.filter(
+    events = Event.query.filter(
+        and_(
             and_(
-                and_(
-                    Event.latitude >= latitude_sw,
-                    Event.latitude < latitude_ne
-                ),
-                and_(
-                    Event.longitude >= longitude_sw,
-                    Event.longitude < longitude_ne
-                )
+                Event.latitude >= latitude_sw,
+                Event.latitude < latitude_ne
+            ),
+            and_(
+                Event.longitude >= longitude_sw,
+                Event.longitude < longitude_ne
             )
-        ).all() or []), payload['device_key'])
+        )
+    ).all() or []
+
+    calculate_event_hotness(events)
+    set_was_hyped_by_user(events, payload['device_key'])
+
+    return events
 
 
 @APP.route('/api/events/by_device_key', methods=['POST'])
@@ -322,9 +326,11 @@ def events_for_account_id(payload):
     device_key = payload['device_key'] or ''
     account = Account.query.filter_by(device_key=device_key).first()
     if account:
-        return set_was_hyped_by_user(
-            calculate_event_hotness(Event.query.filter_by(account_id=account.id).all() or []),
-            payload['device_key'])
+        events = Event.query.filter_by(account_id=account.id).all() or []
+        calculate_event_hotness(events)
+        set_was_hyped_by_user(events, payload['device_key'])
+
+        return events
     return []
 
 
@@ -346,7 +352,6 @@ def create_event(event_data):
     time = event_data.get('time', None)
     description = event_data.get('description', None)
     category = event_data.get('category', None)
-
 
     group_size_min = event_data.get('group_size_min', None)
     group_size_max = event_data.get('group_size_max', None)
@@ -371,6 +376,7 @@ def create_event(event_data):
     except SQLAlchemyError as exception:
         APP.logger.exception('Failed to create event: %s', exception)
         return INTERNAL_SERVER_ERROR_JSON_RESPONSE
+
 
 
 @APP.route('/api/hype/by_id', methods=['POST'])

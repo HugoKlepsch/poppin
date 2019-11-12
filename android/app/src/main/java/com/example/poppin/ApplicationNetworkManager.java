@@ -17,21 +17,20 @@ public class ApplicationNetworkManager {
     private static ApplicationNetworkManager instance;
     private RequestQueue requestQueue;
     private static Context applicationContext;
-    private byte[] accountID;
     final public static String baseAPIURL = "http://10.0.2.2:1221"; // local dev server
+    //final private String baseAPIURL = "http://poppintest.hugo-klepsch.tech"; // worldwide test server
 
-    private ApplicationNetworkManager(Context ctx, byte[] aID) {
-        applicationContext = ctx;
+    private ApplicationNetworkManager(Context context) {
+        applicationContext = context;
         requestQueue = getRequestQueue();
-        this.accountID = aID;
     }
 
-    public static JSONObject getDefaultAuthenticatedRequest() {
+    public static JSONObject getDefaultAuthenticatedRequest(byte[] deviceKey) {
         JSONObject defaultObject;
         defaultObject = new JSONObject();
 
         try {
-            defaultObject.put("device_key", instance.accountID);
+            defaultObject.put("device_key", deviceKey);
         } catch (JSONException e) {
             return null;
         }
@@ -39,26 +38,9 @@ public class ApplicationNetworkManager {
         return defaultObject;
     }
 
-    public static void initialize(Context context, byte[] accountID) {
+    public static synchronized ApplicationNetworkManager getInstance(Context context) {
         if (instance == null) {
-            instance = new ApplicationNetworkManager(context, accountID);
-        }
-    }
-
-    public static synchronized ApplicationNetworkManager getInstance(Context context, byte[] accountID) {
-        if (instance == null) {
-            if (accountID == null) {
-                throw new NullPointerException();
-            }
-            instance = new ApplicationNetworkManager(context, accountID);
-        }
-
-        return instance;
-    }
-
-    public static synchronized ApplicationNetworkManager getExistingInstance() {
-        if (instance == null) {
-            throw new NullPointerException();
+            instance = new ApplicationNetworkManager(context);
         }
         return instance;
     }

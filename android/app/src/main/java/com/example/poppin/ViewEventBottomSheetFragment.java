@@ -41,9 +41,7 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
     private TextView timeView;
     private TextView descriptionView;
     private TextView locationView;
-    private TextView txtTitle;
     private TextView txtGroupSize;
-    private ImageView imgGroupSize;
     private Button hypeButton;
 
 
@@ -98,7 +96,8 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         }
 
         txtGroupSize = view.findViewById(R.id.expected_group_size);
-        String groupSizeDialog = String.format("Recommended Group Size: (%d - %d)", event.getRecommendedGroupSizeMin(), event.getRecommendedGroupSizeMax());
+        String groupSizeDialog = String.format("Recommended Group Size: (%d - %d)",
+                event.getRecommendedGroupSizeMin(), event.getRecommendedGroupSizeMax());
         txtGroupSize.setText(groupSizeDialog);
 
         hypeButton = view.findViewById(R.id.hypebutton);
@@ -115,7 +114,8 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         hypeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                JSONObject obj = ApplicationNetworkManager.getDefaultAuthenticatedRequest();
+                JSONObject obj = ApplicationNetworkManager
+                        .getDefaultAuthenticatedRequest(DeviceKey.getDeviceKey(getContext()));
                 try {
                     obj.put("event_id", event.getId());
                 } catch (JSONException e) {
@@ -135,6 +135,7 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                                                 + response.toString()
                                                 + " length: " + response.length());
                                 event.setWasHyped(true);
+                                hypeButton.setEnabled(false);
                             }
                         },
                         new Response.ErrorListener() {
@@ -146,7 +147,7 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                 );
 
                 ApplicationNetworkManager
-                        .getExistingInstance()
+                        .getInstance(getContext())
                         .addToRequestQueue(request);
             }
         });

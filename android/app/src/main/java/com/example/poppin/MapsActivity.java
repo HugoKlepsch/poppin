@@ -79,12 +79,6 @@ public class MapsActivity extends FragmentActivity
     private static final String TAG = "MapsActivity";
     private GoogleMap mMap;
 
-    private byte[] accountId;
-    private String accountKeyStoragePath = "account_id";
-
-    //private String mBaseAPIURL = "http://10.0.2.2:1221"; // local dev server
-    //private String mBaseAPIURL = "http://poppintest.hugo-klepsch.tech"; // worldwide test server
-
     private Boolean mLocationPermissionsGranted = false;
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private final float DEFAULT_ZOOM = 15f;
@@ -106,11 +100,7 @@ public class MapsActivity extends FragmentActivity
         //Maps is the MainView in this context.
         setContentView(R.layout.activity_maps);
 
-        loadAccountCredentials();
-        ApplicationNetworkManager.initialize(this.getApplicationContext(), this.accountId);
-
         markerMap = new HashMap<>();
-
 
         Log.d(TAG, "onCreate: Forcing Permission Check");
         /* Prior to starting the maps, make sure we have location services */
@@ -209,49 +199,8 @@ public class MapsActivity extends FragmentActivity
         }
     }
 
-    /**
-     *
-     * @return
-     */
-    private byte[] generateAccountCredentials() {
-        byte[] accountId;
-        Random r = new Random();
-        accountId = new byte[256];
 
-        r.nextBytes(accountId);
 
-        try {
-            FileOutputStream fOut = openFileOutput(accountKeyStoragePath, Context.MODE_PRIVATE);
-            fOut.write(accountId);
-            fOut.close();
-        } catch (IOException e) {
-            System.out.println(e.toString());
-        }
-        return accountId;
-    }
-
-    /**
-     *
-     */
-    private void loadAccountCredentials() {
-        FileInputStream fIn;
-        this.accountId = new byte[256];
-
-        try {
-            byte[] bytes = new byte[256];
-            fIn = openFileInput(accountKeyStoragePath);
-            fIn.read(bytes);
-            System.arraycopy(bytes, 0, this.accountId, 0, 256);
-
-        } catch (FileNotFoundException e) {
-            byte[] bytes;
-            bytes = generateAccountCredentials();
-            System.arraycopy(bytes, 0, this.accountId, 0, 256);
-
-        } catch (IOException e) {
-            System.out.println(e.toString());
-        }
-    }
 
     private double chopDouble(double d) {
         return ((int) (d * 10000)) / 10000.00;
@@ -340,7 +289,9 @@ public class MapsActivity extends FragmentActivity
      * @return
      */
     private void loadEventsFromAPI() {
-        JSONObject obj = ApplicationNetworkManager.getDefaultAuthenticatedRequest();
+        JSONObject obj = ApplicationNetworkManager
+                .getDefaultAuthenticatedRequest(
+                        DeviceKey.getDeviceKey(this.getApplicationContext()));
 
         Log.d(TAG, "loadEventsFromAPI start");
         LatLngBounds curScreen = mMap.getProjection().getVisibleRegion().latLngBounds;
@@ -394,12 +345,14 @@ public class MapsActivity extends FragmentActivity
         );
 
         ApplicationNetworkManager
-                .getExistingInstance()
+                .getInstance(this.getApplicationContext())
                 .addToRequestQueue(request);
     }
 
     public void sendEventToAPI(Event event) {
-        JSONObject obj = ApplicationNetworkManager.getDefaultAuthenticatedRequest();
+        JSONObject obj = ApplicationNetworkManager
+                .getDefaultAuthenticatedRequest(
+                        DeviceKey.getDeviceKey(this.getApplicationContext()));
 
         Log.d(TAG, "sendEventToAPI start");
 
@@ -439,7 +392,7 @@ public class MapsActivity extends FragmentActivity
         );
 
         ApplicationNetworkManager
-                .getExistingInstance()
+                .getInstance(this.getApplicationContext())
                 .addToRequestQueue(request);
 
     }
