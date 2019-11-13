@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ImageView;
 
@@ -41,9 +42,9 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
     private TextView descriptionView;
     private TextView locationView;
     private TextView txtGroupSize;
-    private Button hypeButton;
+    private ImageButton hypeButton;
     private ImageView imgGroupSize;
-    private Button btnCheckin;
+    private ImageButton btnCheckin;
 
 
     public ViewEventBottomSheetFragment() {
@@ -90,7 +91,8 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         btnCheckin = view.findViewById(R.id.checkin);
 
         if (event.getIsCheckedIn()) {
-                setCheckedInButton();
+            btnCheckin.setEnabled(false);
+            btnCheckin.setAlpha(.3f);
         }
 
 
@@ -111,9 +113,10 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                 event.getRecommendedGroupSizeMin(), event.getRecommendedGroupSizeMax());
         txtGroupSize.setText(groupSizeDialog);
 
-        hypeButton = view.findViewById(R.id.hypebutton);
+        hypeButton = view.findViewById(R.id.hype);
         if (event.wasHyped()) {
             hypeButton.setEnabled(false);
+            hypeButton.setAlpha(.3f);
         } else {
             hypeButton.setEnabled(true);
         }
@@ -149,6 +152,8 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                                 event.setHype(event.getHype() + 1);
                                 hypeView.setText(Integer.toString(event.getHype()));
                                 hypeButton.setEnabled(false);
+                                hypeButton.setAlpha(.3f);
+
                             }
                         },
                         new Response.ErrorListener() {
@@ -194,7 +199,8 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                                 event.setCheckins(event.getCheckins() + 1);
                                 checkinsView.setText(Integer.toString(event.getCheckins()));
 
-                                setCheckedInButton();
+                                btnCheckin.setEnabled(false);
+                                btnCheckin.setAlpha(.3f);
                             }
                         },
                         new Response.ErrorListener() {
@@ -216,12 +222,7 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         super.onViewCreated(view, savedInstanceState);
     }
 
-    private void setCheckedInButton() {
-        btnCheckin.setText("Checked in");
-        btnCheckin.setTextColor(Color.BLACK);
-        btnCheckin.setEnabled(false);
-        btnCheckin.setAlpha(.3f);
-    }
+
 
     @Nullable
     @Override

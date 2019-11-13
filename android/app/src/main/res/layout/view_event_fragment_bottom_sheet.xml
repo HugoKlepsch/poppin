@@ -165,43 +165,37 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+       >
 
-        <Button
+        <ImageButton
+            android:minHeight="35dp"
+            android:id="@+id/hype"
+            android:src="@drawable/white_fire"
             android:layout_marginVertical="6dp"
             android:layout_marginRight="6dp"
             android:layout_weight="1"
-            android:id="@+id/btnDirections"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
-            android:text="Directions"/>
+            android:background="@color/colorAccent"
+            android:enabled="true"
+          />
+        <ImageButton
+            android:minHeight="35dp"
 
-        <Button
+            android:src="@drawable/ic_checkin_pin_check_white"
             android:id="@+id/checkin"
             android:layout_marginVertical="6dp"
             android:layout_marginLeft="6dp"
             android:layout_weight="1"
             android:layout_width="0dp"
-            android:background="@color/colorAccent"
+            android:background="@color/colorPrimary"
             android:layout_height="wrap_content"
             android:enabled="true"
-            android:text="Check in" />
+            />
 
     </LinearLayout>
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/hypebutton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Hype Event"/>
-
-    </LinearLayout>
 
 </LinearLayout>
