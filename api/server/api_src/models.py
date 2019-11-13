@@ -35,7 +35,7 @@ class Hype(DB.Model):
     id = DB.Column(DB.Integer, nullable=False, autoincrement=True, primary_key=True)
     event_id = DB.Column(DB.Integer, DB.ForeignKey(Event.__tablename__ + '.id'), nullable=False)
     account_id = DB.Column(DB.Integer, DB.ForeignKey(Account.__tablename__ + '.id'), nullable=False)
-    __table_args__ = (DB.UniqueConstraint('event_id', 'account_id', name='hype_event_account_unique_constraint'),)
+    __table_args__ = (DB.UniqueConstraint('event_id', 'account_id', name='_hype_event_account_unique_constraint'),)
 
 
 class HypeSchemaIn(AuthenticatedMessageSchema):
@@ -54,7 +54,7 @@ class Checkin(DB.Model):
     id = DB.Column(DB.Integer, nullable=False, autoincrement=True, primary_key=True)
     event_id = DB.Column(DB.Integer, DB.ForeignKey(Event.__tablename__ + '.id'), nullable=False)
     account_id = DB.Column(DB.Integer, DB.ForeignKey(Account.__tablename__ + '.id'), nullable=False)
-    __table_args__ = (DB.UniqueConstraint('event_id', 'account_id', name='checkin_event_account_unique_constraint'),)
+    __table_args__ = (DB.UniqueConstraint('event_id', 'account_id', name='_checkin_event_account_unique_constraint'),)
 
 
 class CheckinSchemaIn(AuthenticatedMessageSchema):

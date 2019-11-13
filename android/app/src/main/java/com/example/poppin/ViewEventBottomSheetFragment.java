@@ -1,6 +1,5 @@
 package com.example.poppin;
 
-import android.graphics.Color;
 import android.location.Geocoder;
 import android.os.Build;
 import android.os.Bundle;
@@ -8,7 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ImageView;
@@ -43,8 +41,7 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
     private TextView locationView;
     private TextView txtGroupSize;
     private ImageButton hypeButton;
-    private ImageView imgGroupSize;
-    private ImageButton btnCheckin;
+    private ImageButton checkinButton;
 
 
     public ViewEventBottomSheetFragment() {
@@ -81,20 +78,17 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         categoryView = view.findViewById(R.id.category);
         categoryView.setText(event.getCategory());
 
-
         descriptionView = view.findViewById(R.id.description);
         descriptionView.setText(event.getDescription());
 
         locationView = view.findViewById(R.id.location);
 
+        checkinButton = view.findViewById(R.id.checkin);
 
-        btnCheckin = view.findViewById(R.id.checkin);
-
-        if (event.getIsCheckedIn()) {
-            btnCheckin.setEnabled(false);
-            btnCheckin.setAlpha(.3f);
+        if (event.getWasCheckedIn()) {
+            checkinButton.setEnabled(false);
+            checkinButton.setAlpha(.3f);
         }
-
 
         try {
             locationView.setText(
@@ -129,7 +123,8 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
             @Override
             public void onClick(View v) {
                 JSONObject obj = ApplicationNetworkManager
-                        .getDefaultAuthenticatedRequest(DeviceKey.getDeviceKey(getContext().getApplicationContext()));
+                        .getDefaultAuthenticatedRequest(DeviceKey
+                                .getDeviceKey(getContext().getApplicationContext()));
                 try {
                     obj.put("event_id", event.getId());
                 } catch (JSONException e) {
@@ -170,13 +165,12 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
             }
         });
 
-        btnCheckin.setOnClickListener(new View.OnClickListener() {
+        checkinButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
                 JSONObject obj = ApplicationNetworkManager
-                        .getDefaultAuthenticatedRequest(DeviceKey.getDeviceKey(getContext().getApplicationContext()));
+                        .getDefaultAuthenticatedRequest(DeviceKey
+                                .getDeviceKey(getContext().getApplicationContext()));
                 try {
                     obj.put("event_id", event.getId());
                 } catch (JSONException e) {
@@ -195,12 +189,12 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                                         "Checkin Event: onResponse. response: "
                                                 + response.toString()
                                                 + " length: " + response.length());
-                                event.setIsCheckedIn(true);
+                                event.setWasCheckedIn(true);
                                 event.setCheckins(event.getCheckins() + 1);
                                 checkinsView.setText(Integer.toString(event.getCheckins()));
 
-                                btnCheckin.setEnabled(false);
-                                btnCheckin.setAlpha(.3f);
+                                checkinButton.setEnabled(false);
+                                checkinButton.setAlpha(.3f);
                             }
                         },
                         new Response.ErrorListener() {
@@ -221,7 +215,6 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
 
         super.onViewCreated(view, savedInstanceState);
     }
-
 
 
     @Nullable

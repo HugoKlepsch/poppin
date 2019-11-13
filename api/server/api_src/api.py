@@ -53,34 +53,6 @@ def create_app():  # {{{
     return _app
 # }}}
 
-
-def set_was_checkedin_by_user(event, device_key):# {{{
-    """
-        Given an event, check to see if it was been checked into for a user.
-     """
-
-    def _set_was_checkedin_by_user(_event, _device_key):
-        event_id = _event.id
-        try:
-            account_id = Account.query.filter_by(device_key=_device_key).first().id
-
-            was_checkedin = Checkin.query.filter_by(account_id=account_id, event_id=event_id).count()
-            return was_checkedin
-
-        except SQLAlchemyError as exception:
-            APP.logger.exception("Failed to retrieve hype record: %s", exception)
-            return None
-
-    if isinstance(event, list):
-        for element in event:
-            element.was_checkedin = _set_was_checkedin_by_user(element, device_key)
-
-    else:
-        event.was_checkedin = _set_was_checkedin_by_user(event, device_key)
-
-    return event
-
-
 def setup_database(_app):  # {{{
     """Add some sample data to database"""
     with _app.app_context():
@@ -234,7 +206,7 @@ def calculate_event_checkins(event):
         try:
             return Checkin.query.filter_by(event_id=event_id).count()
         except SQLAlchemyError as exception:
-            APP.logger.exception("Failed to get hype for event: %s", exception)
+            APP.logger.exception("Failed to calculate the checkins for this event: %s", exception)
             return None
 
     if isinstance(event, list):
@@ -242,6 +214,33 @@ def calculate_event_checkins(event):
             element.checkins = _calculate_event_checkins(element)
     else:
         event.checkins = _calculate_event_checkins(event)
+    return event
+
+
+def set_was_checkedin_by_user(event, device_key):# {{{
+    """
+        Given an event, check to see if it was been checked into for a user.
+    """
+
+    def _set_was_checkedin_by_user(_event, _device_key):
+        event_id = _event.id
+        try:
+            account_id = Account.query.filter_by(device_key=_device_key).first().id
+
+            was_checkedin = Checkin.query.filter_by(account_id=account_id, event_id=event_id).count() > 0
+            return was_checkedin
+
+        except SQLAlchemyError as exception:
+            APP.logger.exception("Failed to check into this event: %s", exception)
+            return None
+
+    if isinstance(event, list):
+        for element in event:
+            element.was_checkedin = _set_was_checkedin_by_user(element, device_key)
+
+    else:
+        event.was_checkedin = _set_was_checkedin_by_user(event, device_key)
+
     return event
 
 
@@ -257,8 +256,8 @@ def set_was_hyped_by_user(event, device_key):
             account_id = Account.query.filter_by(device_key=_device_key).first().id
 
             # check if there exists a record of this account hyping this event.
-            was_hyped = Hype.query.filter_by(account_id=account_id, event_id=event_id).count()
-            return bool(was_hyped)
+            was_hyped = Hype.query.filter_by(account_id=account_id, event_id=event_id).count() > 0
+            return was_hyped
 
         except SQLAlchemyError as exception:
             APP.logger.exception("Failed to retrieve hype record: %s", exception)
@@ -271,7 +270,6 @@ def set_was_hyped_by_user(event, device_key):
     else:
         event.was_hyped = _set_was_hyped_by_user(event, device_key)
     return event
-
 
 
 def calculate_event_hype(event):

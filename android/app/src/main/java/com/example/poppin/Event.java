@@ -63,7 +63,6 @@ public class Event implements Serializable {
         this.setCheckins(100);
         this.setHype(100);
 
-        /* TODO: This Stub code. Currently the server is not handling this. We wil do it locally */
         this.wasCheckedIn = false;
         this.wasHyped = false;
     }
@@ -315,14 +314,14 @@ public class Event implements Serializable {
     /**
      * @return
      */
-    public void setIsCheckedIn(boolean isCheckedIn) {
-        this.wasCheckedIn =  isCheckedIn;
+    public void setWasCheckedIn(boolean wasCheckedIn) {
+        this.wasCheckedIn =  wasCheckedIn;
     }
 
     /**
      * @return
      */
-    public Boolean getIsCheckedIn() {
+    public Boolean getWasCheckedIn() {
         return wasCheckedIn;
     }
 
