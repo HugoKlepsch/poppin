@@ -11,7 +11,7 @@ class Account(DB.Model):
     """Account database model"""
     __tablename__ = 'accounts'
     id = DB.Column(DB.Integer, nullable=False, autoincrement=True, primary_key=True)
-    device_key = DB.Column(DB.String(120), nullable=False)
+    device_key = DB.Column(DB.String(350), nullable=False)
 
 
 class Event(DB.Model):

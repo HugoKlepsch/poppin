@@ -1,6 +1,7 @@
 package com.example.poppin;
 
 import android.content.Context;
+import android.util.Base64;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -30,7 +31,7 @@ public class ApplicationNetworkManager {
         defaultObject = new JSONObject();
 
         try {
-            defaultObject.put("device_key", deviceKey);
+            defaultObject.put("device_key", Base64.encodeToString(deviceKey, Base64.DEFAULT));
         } catch (JSONException e) {
             return null;
         }
