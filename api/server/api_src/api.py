@@ -117,6 +117,7 @@ def setup_database(_app):  # {{{
             DB.session.commit()
             for i in range(3):
                 DB.session.add(Hype(account_id=test_accounts[i].id, event_id=example_event.id))
+                DB.session.add(Checkin(account_id=test_accounts[i].id, event_id=example_event.id))
 
             example_event_two = Event(account_id=example_account.id, latitude=43.545199, longitude=-80.246926,
                                       group_size_max=5, group_size_min=3, title="Trappers halloween costume party",
@@ -126,6 +127,7 @@ def setup_database(_app):  # {{{
             DB.session.commit()
             for i in range(5):
                 DB.session.add(Hype(account_id=test_accounts[i].id, event_id=example_event_two.id))
+                DB.session.add(Checkin(account_id=test_accounts[i].id, event_id=example_event_two.id))
 
             example_event_three = Event(account_id=example_account.id, latitude=43.530793, longitude=-80.229077,
                                         group_size_max=1, group_size_min=1, title="LAN party in Reynolds!",
@@ -135,6 +137,7 @@ def setup_database(_app):  # {{{
             DB.session.commit()
             for i in range(3):
                 DB.session.add(Hype(account_id=test_accounts[i].id, event_id=example_event_three.id))
+                DB.session.add(Checkin(account_id=test_accounts[i].id, event_id=example_event_three.id))
 
             example_event_four = Event(account_id=example_account.id, latitude=43.531793, longitude=-80.228077,
                                        group_size_max=1, group_size_min=1, title="Vapers anonymous",
