@@ -58,13 +58,11 @@ public class DeviceKey {
             fIn = new FileInputStream(f);
             fIn.read(bytes);
             System.arraycopy(bytes, 0, deviceKey, 0, 256);
-            Log.d("DeviceKeyLoadKey", deviceKey.toString());
 
         } catch (FileNotFoundException e) {
             byte[] bytes;
             bytes = generateAccountCredentials(context);
             System.arraycopy(bytes, 0, deviceKey, 0, 256);
-            Log.d("DeviceKeyLoadKey", deviceKey.toString());
 
         } catch (IOException e) {
             System.out.println(e.toString());
