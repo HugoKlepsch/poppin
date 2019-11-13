@@ -208,8 +208,6 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                 ApplicationNetworkManager
                         .getInstance(getContext().getApplicationContext())
                         .addToRequestQueue(request);
-
-
             }
         });
 
