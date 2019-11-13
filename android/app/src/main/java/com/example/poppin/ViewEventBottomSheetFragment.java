@@ -7,7 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ImageView;
 
@@ -27,8 +27,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.time.temporal.TemporalField;
-import java.util.Date;
 
 import static com.android.volley.VolleyLog.TAG;
 
@@ -42,7 +40,8 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
     private TextView descriptionView;
     private TextView locationView;
     private TextView txtGroupSize;
-    private Button hypeButton;
+    private ImageButton hypeButton;
+    private ImageButton checkinButton;
 
 
     public ViewEventBottomSheetFragment() {
@@ -83,6 +82,14 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         descriptionView.setText(event.getDescription());
 
         locationView = view.findViewById(R.id.location);
+
+        checkinButton = view.findViewById(R.id.checkin);
+
+        if (event.getWasCheckedIn()) {
+            checkinButton.setEnabled(false);
+            checkinButton.setAlpha(.3f);
+        }
+
         try {
             locationView.setText(
                     geocoder.getFromLocation(
@@ -100,9 +107,10 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                 event.getRecommendedGroupSizeMin(), event.getRecommendedGroupSizeMax());
         txtGroupSize.setText(groupSizeDialog);
 
-        hypeButton = view.findViewById(R.id.hypebutton);
+        hypeButton = view.findViewById(R.id.hype);
         if (event.wasHyped()) {
             hypeButton.setEnabled(false);
+            hypeButton.setAlpha(.3f);
         } else {
             hypeButton.setEnabled(true);
         }
@@ -115,7 +123,8 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
             @Override
             public void onClick(View v) {
                 JSONObject obj = ApplicationNetworkManager
-                        .getDefaultAuthenticatedRequest(DeviceKey.getDeviceKey(getContext().getApplicationContext()));
+                        .getDefaultAuthenticatedRequest(DeviceKey
+                                .getDeviceKey(getContext().getApplicationContext()));
                 try {
                     obj.put("event_id", event.getId());
                 } catch (JSONException e) {
@@ -138,6 +147,8 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                                 event.setHype(event.getHype() + 1);
                                 hypeView.setText(Integer.toString(event.getHype()));
                                 hypeButton.setEnabled(false);
+                                hypeButton.setAlpha(.3f);
+
                             }
                         },
                         new Response.ErrorListener() {
@@ -154,8 +165,55 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
             }
         });
 
+        checkinButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                JSONObject obj = ApplicationNetworkManager
+                        .getDefaultAuthenticatedRequest(DeviceKey
+                                .getDeviceKey(getContext().getApplicationContext()));
+                try {
+                    obj.put("event_id", event.getId());
+                } catch (JSONException e) {
+                    Log.e(TAG, "Failed to apply keys to JSON request object");
+                    return;
+                }
+
+                JsonRequest request = new JsonObjectRequest(
+                        Request.Method.POST,
+                        ApplicationNetworkManager.baseAPIURL + "/api/checkin/by_id",
+                        obj,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                Log.d(TAG,
+                                        "Checkin Event: onResponse. response: "
+                                                + response.toString()
+                                                + " length: " + response.length());
+                                event.setWasCheckedIn(true);
+                                event.setCheckins(event.getCheckins() + 1);
+                                checkinsView.setText(Integer.toString(event.getCheckins()));
+
+                                checkinButton.setEnabled(false);
+                                checkinButton.setAlpha(.3f);
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.e(TAG, "Checkin Event: error response" + error.toString());
+                            }
+                        }
+                );
+
+                ApplicationNetworkManager
+                        .getInstance(getContext().getApplicationContext())
+                        .addToRequestQueue(request);
+            }
+        });
+
         super.onViewCreated(view, savedInstanceState);
     }
+
 
     @Nullable
     @Override

@@ -17,6 +17,7 @@ from api_src.models import Account, Event, Hype
 from api_src.models import AccountSchemaOut
 from api_src.models import EventSchemaIn, EventSchemaOut, EventQueryByLocationSchema
 from api_src.models import HypeSchemaIn
+from api_src.models import Checkin, CheckinSchemaIn
 from api_src.models import AuthenticatedMessageSchema
 from api_src.schema import JSON_CT, INTERNAL_SERVER_ERROR_JSON_RESPONSE, ok_response
 from api_src.schema import JsonApiSchema
@@ -51,7 +52,6 @@ def create_app():  # {{{
 
     return _app
 # }}}
-
 
 def setup_database(_app):  # {{{
     """Add some sample data to database"""
@@ -89,6 +89,7 @@ def setup_database(_app):  # {{{
             DB.session.commit()
             for i in range(3):
                 DB.session.add(Hype(account_id=test_accounts[i].id, event_id=example_event.id))
+                DB.session.add(Checkin(account_id=test_accounts[i].id, event_id=example_event.id))
 
             example_event_two = Event(account_id=example_account.id, latitude=43.545199, longitude=-80.246926,
                                       group_size_max=5, group_size_min=3, title="Trappers halloween costume party",
@@ -98,6 +99,7 @@ def setup_database(_app):  # {{{
             DB.session.commit()
             for i in range(5):
                 DB.session.add(Hype(account_id=test_accounts[i].id, event_id=example_event_two.id))
+                DB.session.add(Checkin(account_id=test_accounts[i].id, event_id=example_event_two.id))
 
             example_event_three = Event(account_id=example_account.id, latitude=43.530793, longitude=-80.229077,
                                         group_size_max=1, group_size_min=1, title="LAN party in Reynolds!",
@@ -107,6 +109,7 @@ def setup_database(_app):  # {{{
             DB.session.commit()
             for i in range(3):
                 DB.session.add(Hype(account_id=test_accounts[i].id, event_id=example_event_three.id))
+                DB.session.add(Checkin(account_id=test_accounts[i].id, event_id=example_event_three.id))
 
             example_event_four = Event(account_id=example_account.id, latitude=43.531793, longitude=-80.228077,
                                        group_size_max=1, group_size_min=1, title="Vapers anonymous",
@@ -199,13 +202,45 @@ def calculate_event_checkins(event):
     """
 
     def _calculate_event_checkins(_event):
-        return 1  # TODO
+        event_id = _event.id
+        try:
+            return Checkin.query.filter_by(event_id=event_id).count()
+        except SQLAlchemyError as exception:
+            APP.logger.exception("Failed to calculate the checkins for this event: %s", exception)
+            return None
 
     if isinstance(event, list):
         for element in event:
             element.checkins = _calculate_event_checkins(element)
     else:
         event.checkins = _calculate_event_checkins(event)
+    return event
+
+
+def set_was_checkedin_by_user(event, device_key):# {{{
+    """
+        Given an event, check to see if it was been checked into for a user.
+    """
+
+    def _set_was_checkedin_by_user(_event, _device_key):
+        event_id = _event.id
+        try:
+            account_id = Account.query.filter_by(device_key=_device_key).first().id
+
+            was_checkedin = Checkin.query.filter_by(account_id=account_id, event_id=event_id).count() > 0
+            return was_checkedin
+
+        except SQLAlchemyError as exception:
+            APP.logger.exception("Failed to check into this event: %s", exception)
+            return None
+
+    if isinstance(event, list):
+        for element in event:
+            element.was_checkedin = _set_was_checkedin_by_user(element, device_key)
+
+    else:
+        event.was_checkedin = _set_was_checkedin_by_user(event, device_key)
+
     return event
 
 
@@ -221,8 +256,8 @@ def set_was_hyped_by_user(event, device_key):
             account_id = Account.query.filter_by(device_key=_device_key).first().id
 
             # check if there exists a record of this account hyping this event.
-            was_hyped = Hype.query.filter_by(account_id=account_id, event_id=event_id).count()
-            return bool(was_hyped)
+            was_hyped = Hype.query.filter_by(account_id=account_id, event_id=event_id).count() > 0
+            return was_hyped
 
         except SQLAlchemyError as exception:
             APP.logger.exception("Failed to retrieve hype record: %s", exception)
@@ -235,7 +270,6 @@ def set_was_hyped_by_user(event, device_key):
     else:
         event.was_hyped = _set_was_hyped_by_user(event, device_key)
     return event
-
 
 
 def calculate_event_hype(event):
@@ -307,7 +341,9 @@ def events_for_area(payload):
     ).all() or []
 
     calculate_event_hotness(events)
+    calculate_event_checkins(events)
     set_was_hyped_by_user(events, payload['device_key'])
+    set_was_checkedin_by_user(events, payload['device_key'])
 
     return events
 
@@ -328,8 +364,9 @@ def events_for_account_id(payload):
     if account:
         events = Event.query.filter_by(account_id=account.id).all() or []
         calculate_event_hotness(events)
+        calculate_event_checkins(events)
         set_was_hyped_by_user(events, payload['device_key'])
-
+        set_was_checkedin_by_user(events, payload['device_key'])
         return events
     return []
 
@@ -377,6 +414,30 @@ def create_event(event_data):
         APP.logger.exception('Failed to create event: %s', exception)
         return INTERNAL_SERVER_ERROR_JSON_RESPONSE
 
+
+@APP.route('/api/checkin/by_id', methods=['POST'])
+@use_args(CheckinSchemaIn())
+@authenticated()
+@marshal_with(JsonApiSchema())
+def checkin_event(checkin_data):
+    """Endpoint for Checking into an event; creates a new Checkin entry"""
+    device_key = checkin_data.get('device_key', None)
+    event_id = checkin_data.get('event_id', None)
+
+    try:
+        account = Account.query.filter_by(device_key=device_key).first()
+
+        if Checkin.query.filter_by(account_id=account.id, event_id=event_id).count() > 0:
+            return {'msg': 'Cannot checkin to this event again.'}, 409, JSON_CT
+
+        checkin = Checkin(account_id=account.id, event_id=event_id)
+        DB.session.add(checkin)
+        DB.session.commit()
+        return ok_response('Successfully checked in to this event %d' % (event_id))
+
+    except SQLAlchemyError as exception:
+        APP.logger.exception("Failed to checkin to this event: %s", exception)
+        return INTERNAL_SERVER_ERROR_JSON_RESPONSE
 
 
 @APP.route('/api/hype/by_id', methods=['POST'])

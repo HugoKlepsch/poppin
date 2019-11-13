@@ -1,7 +1,6 @@
 package com.example.poppin;
 
 import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -11,12 +10,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -31,7 +27,7 @@ public class Event implements Serializable {
     private String category;
     private int recommendedGroupSizeMin;
     private int recommendedGroupSizeMax;
-
+    private boolean wasCheckedIn;
 
     final static private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");;
 
@@ -66,6 +62,8 @@ public class Event implements Serializable {
 
         this.setCheckins(100);
         this.setHype(100);
+
+        this.wasCheckedIn = false;
         this.wasHyped = false;
     }
 
@@ -90,6 +88,7 @@ public class Event implements Serializable {
         this.recommendedGroupSizeMax = jsonObj.getInt("group_size_max");
         this.recommendedGroupSizeMin = jsonObj.getInt("group_size_min");
         this.wasHyped = jsonObj.has("was_hyped") && jsonObj.getBoolean("was_hyped");
+        this.wasCheckedIn = jsonObj.has("was_checkedin") && jsonObj.getBoolean("was_checkedin");
     }
 
     /**
@@ -312,6 +311,19 @@ public class Event implements Serializable {
         return recommendedGroupSizeMax;
     }
 
+    /**
+     * @return
+     */
+    public void setWasCheckedIn(boolean wasCheckedIn) {
+        this.wasCheckedIn =  wasCheckedIn;
+    }
+
+    /**
+     * @return
+     */
+    public Boolean getWasCheckedIn() {
+        return wasCheckedIn;
+    }
 
     /**
      *

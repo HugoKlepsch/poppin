@@ -35,7 +35,7 @@ class Hype(DB.Model):
     id = DB.Column(DB.Integer, nullable=False, autoincrement=True, primary_key=True)
     event_id = DB.Column(DB.Integer, DB.ForeignKey(Event.__tablename__ + '.id'), nullable=False)
     account_id = DB.Column(DB.Integer, DB.ForeignKey(Account.__tablename__ + '.id'), nullable=False)
-    __table_args__ = (DB.UniqueConstraint('event_id', 'account_id', name='_event_account_unique_constraint'),)
+    __table_args__ = (DB.UniqueConstraint('event_id', 'account_id', name='_hype_event_account_unique_constraint'),)
 
 
 class HypeSchemaIn(AuthenticatedMessageSchema):
@@ -45,6 +45,25 @@ class HypeSchemaIn(AuthenticatedMessageSchema):
 
 class HypeSchemaOut(JsonApiSchema):
     """The output schema for get Hype requests"""
+    count = fields.Integer()
+
+
+class Checkin(DB.Model):
+    """Checkin database model"""
+    __tablename__ = 'checkins'
+    id = DB.Column(DB.Integer, nullable=False, autoincrement=True, primary_key=True)
+    event_id = DB.Column(DB.Integer, DB.ForeignKey(Event.__tablename__ + '.id'), nullable=False)
+    account_id = DB.Column(DB.Integer, DB.ForeignKey(Account.__tablename__ + '.id'), nullable=False)
+    __table_args__ = (DB.UniqueConstraint('event_id', 'account_id', name='_checkin_event_account_unique_constraint'),)
+
+
+class CheckinSchemaIn(AuthenticatedMessageSchema):
+    """Checking Input schema"""
+    event_id = fields.Integer()
+
+
+class CheckinSchemaOut(JsonApiSchema):
+    """Checkin Output Schema"""
     count = fields.Integer()
 
 
@@ -84,6 +103,7 @@ class EventSchemaOut(JsonApiSchema):
     description = fields.String()
     hype = fields.Integer()
     checkins = fields.Integer()
+    was_checkedin = fields.Boolean()
     was_hyped = fields.Boolean()
 
 
