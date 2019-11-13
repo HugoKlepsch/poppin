@@ -1,7 +1,9 @@
 package com.example.poppin;
 
 import android.content.Context;
+import android.util.Log;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -24,7 +26,8 @@ public class DeviceKey {
         r.nextBytes(accountId);
 
         try {
-            FileOutputStream fOut = context.openFileOutput(accountKeyStoragePath, Context.MODE_PRIVATE);
+            File f = new File(context.getFilesDir(), accountKeyStoragePath);
+            FileOutputStream fOut = new FileOutputStream(f);
             fOut.write(accountId);
             fOut.close();
         } catch (IOException e) {
@@ -51,7 +54,8 @@ public class DeviceKey {
 
         try {
             byte[] bytes = new byte[256];
-            fIn = context.openFileInput(accountKeyStoragePath);
+            File f = new File(context.getFilesDir(), accountKeyStoragePath);
+            fIn = new FileInputStream(f);
             fIn.read(bytes);
             System.arraycopy(bytes, 0, deviceKey, 0, 256);
 
