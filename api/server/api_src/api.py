@@ -17,7 +17,7 @@ from api_src.models import Account, Event, Hype
 from api_src.models import AccountSchemaOut
 from api_src.models import EventSchemaIn, EventSchemaOut, EventQueryByLocationSchema
 from api_src.models import HypeSchemaIn
-from api_src.models import Checkin
+from api_src.models import Checkin, CheckinSchemaIn
 from api_src.models import AuthenticatedMessageSchema
 from api_src.schema import JSON_CT, INTERNAL_SERVER_ERROR_JSON_RESPONSE, ok_response
 from api_src.schema import JsonApiSchema
@@ -340,7 +340,9 @@ def events_for_area(payload):
     ).all() or []
 
     calculate_event_hotness(events)
+    calculate_event_checkins(events)
     set_was_hyped_by_user(events, payload['device_key'])
+    set_was_checkedin_by_user(events, payload['device_key'])
 
     return events
 
@@ -361,8 +363,9 @@ def events_for_account_id(payload):
     if account:
         events = Event.query.filter_by(account_id=account.id).all() or []
         calculate_event_hotness(events)
+        calculate_event_checkins(events)
         set_was_hyped_by_user(events, payload['device_key'])
-
+        set_was_checkedin_by_user(events, payload['device_key'])
         return events
     return []
 
@@ -410,6 +413,30 @@ def create_event(event_data):
         APP.logger.exception('Failed to create event: %s', exception)
         return INTERNAL_SERVER_ERROR_JSON_RESPONSE
 
+
+@APP.route('/api/checkin/by_id', methods=['POST'])
+@use_args(CheckinSchemaIn())
+@authenticated()
+@marshal_with(JsonApiSchema())
+def checkin_event(checkin_data):
+    """Endpoint for Checking into an event; creates a new Checkin entry"""
+    device_key = checkin_data.get('device_key', None)
+    event_id = checkin_data.get('event_id', None)
+
+    try:
+        account = Account.query.filter_by(device_key=device_key).first()
+
+        if Checkin.query.filter_by(account_id=account.id, event_id=event_id).count() > 0:
+            return {'msg': 'Cannot checkin to this event again.'}, 409, JSON_CT
+
+        checkin = Checkin(account_id=account.id, event_id=event_id)
+        DB.session.add(checkin)
+        DB.session.commit()
+        return ok_response('Successfully checked in to this event %d' % (event_id))
+
+    except SQLAlchemyError as exception:
+        APP.logger.exception("Failed to checkin to this event: %s", exception)
+        return INTERNAL_SERVER_ERROR_JSON_RESPONSE
 
 
 @APP.route('/api/hype/by_id', methods=['POST'])

@@ -1,7 +1,6 @@
 package com.example.poppin;
 
 import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -11,12 +10,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -31,7 +27,7 @@ public class Event implements Serializable {
     private String category;
     private int recommendedGroupSizeMin;
     private int recommendedGroupSizeMax;
-    private boolean isCheckedIn;
+    private boolean wasCheckedIn;
 
     final static private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");;
 
@@ -68,7 +64,7 @@ public class Event implements Serializable {
         this.setHype(100);
 
         /* TODO: This Stub code. Currently the server is not handling this. We wil do it locally */
-        this.isCheckedIn = false;
+        this.wasCheckedIn = false;
         this.wasHyped = false;
     }
 
@@ -93,6 +89,7 @@ public class Event implements Serializable {
         this.recommendedGroupSizeMax = jsonObj.getInt("group_size_max");
         this.recommendedGroupSizeMin = jsonObj.getInt("group_size_min");
         this.wasHyped = jsonObj.has("was_hyped") && jsonObj.getBoolean("was_hyped");
+        this.wasCheckedIn = jsonObj.has("was_checkedin") && jsonObj.getBoolean("was_checkedin");
     }
 
     /**
@@ -319,14 +316,14 @@ public class Event implements Serializable {
      * @return
      */
     public void setIsCheckedIn(boolean isCheckedIn) {
-        this.isCheckedIn =  isCheckedIn;
+        this.wasCheckedIn =  isCheckedIn;
     }
 
     /**
      * @return
      */
     public Boolean getIsCheckedIn() {
-        return isCheckedIn;
+        return wasCheckedIn;
     }
 
     /**

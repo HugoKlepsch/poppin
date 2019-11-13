@@ -81,7 +81,6 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         categoryView.setText(event.getCategory());
 
 
-
         descriptionView = view.findViewById(R.id.description);
         descriptionView.setText(event.getDescription());
 
@@ -170,10 +169,47 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
             @Override
             public void onClick(View v) {
 
-                        setCheckedInButton();
 
-                    /* TODO: Update Server: Blocked by -> MUST-9 API must have an endpoint to check-in to an event
-                    * */
+                JSONObject obj = ApplicationNetworkManager
+                        .getDefaultAuthenticatedRequest(DeviceKey.getDeviceKey(getContext().getApplicationContext()));
+                try {
+                    obj.put("event_id", event.getId());
+                } catch (JSONException e) {
+                    Log.e(TAG, "Failed to apply keys to JSON request object");
+                    return;
+                }
+
+                JsonRequest request = new JsonObjectRequest(
+                        Request.Method.POST,
+                        ApplicationNetworkManager.baseAPIURL + "/api/checkin/by_id",
+                        obj,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                Log.d(TAG,
+                                        "Checkin Event: onResponse. response: "
+                                                + response.toString()
+                                                + " length: " + response.length());
+                                event.setIsCheckedIn(true);
+                                event.setCheckins(event.getCheckins() + 1);
+                                checkinsView.setText(Integer.toString(event.getCheckins()));
+
+                                setCheckedInButton();
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.e(TAG, "Checkin Event: error response" + error.toString());
+                            }
+                        }
+                );
+
+                ApplicationNetworkManager
+                        .getInstance(getContext().getApplicationContext())
+                        .addToRequestQueue(request);
+
+
             }
         });
 
