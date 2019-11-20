@@ -19,7 +19,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -47,15 +46,8 @@ import com.google.maps.android.heatmaps.Gradient;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
 import com.google.maps.android.heatmaps.WeightedLatLng;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -92,6 +84,15 @@ public class MapsActivity extends FragmentActivity
     private TileOverlay mOverlay;
 
     private LatLng currentLocation = new LatLng(0, 0);
+    private boolean scrollToCurrentLocationOnUpdate = true;
+
+    public synchronized LatLng getCurrentLocation() {
+        return new LatLng(currentLocation.latitude, currentLocation.longitude);
+    }
+
+    private synchronized void setCurrentLocation(LatLng location) {
+        this.currentLocation = new LatLng(location.latitude, location.longitude);
+    }
 
 
     @Override
@@ -124,10 +125,17 @@ public class MapsActivity extends FragmentActivity
             }
         });
 
+        scrollToCurrentLocationOnUpdate = true;
+
         LocationListener mLocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                MapsActivity.this.setCurrentLocation(new LatLng(location.getLatitude(), location.getLongitude()));
+
+                if (scrollToCurrentLocationOnUpdate) {
+                    moveCamera(MapsActivity.this.getCurrentLocation(), DEFAULT_ZOOM);
+                    scrollToCurrentLocationOnUpdate = false;
+                }
             }
 
             @Override
@@ -150,13 +158,9 @@ public class MapsActivity extends FragmentActivity
         LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (
-                    checkSelfPermission(
-                            Manifest.permission.ACCESS_FINE_LOCATION)
-                            != PackageManager.PERMISSION_GRANTED
+                    checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                             &&
-                            checkSelfPermission(
-                                    Manifest.permission.ACCESS_COARSE_LOCATION)
-                                    != PackageManager.PERMISSION_GRANTED) {
+                            checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
                 /*
                  TODO: Consider calling
@@ -169,38 +173,23 @@ public class MapsActivity extends FragmentActivity
                  */
                 mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                         5000, 10, mLocationListener);
+            } else {
+                Log.e("locationManager", "permissions check");
             }
+        } else {
+            Log.e("locationManager", "build version check");
         }
     }
 
     @Override
     public void onEventCreate(Event event) {
-        try {
-            if (mLocationPermissionsGranted) {
-                LocationManager locationManager =
-                        (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                Criteria criteria = new Criteria();
 
-                Location currentLocation = locationManager
-                        .getLastKnownLocation(locationManager
-                                .getBestProvider(criteria, false));
+        event.setLocation(this.getCurrentLocation());
 
-                event.setLocation(new LatLng(
-                        currentLocation.getLatitude(),
-                        currentLocation.getLongitude()));
+        sendEventToAPI(event);
 
-                sendEventToAPI(event);
-
-                addEventToMap(event);
-            }
-        } catch (SecurityException e) {
-            /* Permissions are not granted - get them */
-            forcePermissionsRequest();
-        }
+        addEventToMap(event);
     }
-
-
-
 
     private double chopDouble(double d) {
         return ((int) (d * 10000)) / 10000.00;
@@ -243,7 +232,7 @@ public class MapsActivity extends FragmentActivity
                     event.getHotness()));
             list.addAll(generateDemoPoints(event));
         }
-        list.add(new WeightedLatLng(currentLocation, 0.0000001)); // Can't be empty
+        list.add(new WeightedLatLng(this.getCurrentLocation(), 0.0000001)); // Can't be empty
 
         return list;
     }
@@ -261,7 +250,7 @@ public class MapsActivity extends FragmentActivity
         };
 
         float[] startPoints = {
-                0.09F, 0.2F, 0.3F, 0.4F, 0.5F, 0.7F
+                0.19F, 1.3F, 2.5F, 10.0F, 21.0F, 31.55F
         };
 
         Gradient gradient = new Gradient(colors, startPoints);
@@ -271,7 +260,7 @@ public class MapsActivity extends FragmentActivity
                 .weightedData(list)
                 .gradient(gradient)
                 .build();
-        mProvider.setRadius(25);
+        //mProvider.setRadius(25);
         mOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
     }
 
@@ -448,7 +437,6 @@ public class MapsActivity extends FragmentActivity
         loadEventsFromAPI();
 
         if (mLocationPermissionsGranted) {
-            setUserLocation();
             mMap.setMyLocationEnabled(true);
         }
     }
@@ -461,37 +449,6 @@ public class MapsActivity extends FragmentActivity
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
 
     }
-
-    private void setUserLocation() {
-        Log.d(TAG, "getUserLocation: Getting the users location");
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        try {
-            if (mLocationPermissionsGranted) {
-                Task location = mFusedLocationProviderClient.getLastLocation();
-                location.addOnCompleteListener(new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "found location");
-                            Location currentLocation = (Location) task.getResult();
-                            moveCamera(
-                                    new LatLng(
-                                            currentLocation.getLatitude(),
-                                            currentLocation.getLongitude()),
-                                    DEFAULT_ZOOM);
-                        } else {
-                            Log.d(TAG, "could not find location");
-                        }
-                    }
-                });
-            }
-        }
-        catch (SecurityException e){
-            /* Permissions are not granted - get them*/
-            forcePermissionsRequest();
-        }
-    }
-
 
     private void initMap() {
         SupportMapFragment mapFragment =
@@ -529,17 +486,6 @@ public class MapsActivity extends FragmentActivity
                 initMap(); /* Do not try and open the map until we have all required permissions */
             }
         }
-    }
-
-    /**
-     *
-     * @param zoom
-     * @return
-     */
-    private int getRadiusFromZoom(float zoom) {
-        int radius = (int) (zoom * 10);
-        Log.d("Zoom", "zoom: radius = " + zoom + ": " + radius);
-        return radius;
     }
 
     /**
