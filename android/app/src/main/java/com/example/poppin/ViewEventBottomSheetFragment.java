@@ -5,6 +5,7 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -159,10 +160,6 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                     return;
                 }
 
-
-
-
-
                 JsonRequest request = new JsonObjectRequest(
                         Request.Method.POST,
                         ApplicationNetworkManager.baseAPIURL + "/api/hype/by_id",
@@ -211,6 +208,14 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
 
 
 
+                if (!isEventNearby(100.00f, event)) {
+                    Toast notifyUser = Toast.makeText(getActivity(), "You must to be within 100 meters of an event to check in.", Toast.LENGTH_LONG);
+                    notifyUser.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 10);
+                    notifyUser.show();
+                    return;
+                }
+
+
 
                 JsonRequest request = new JsonObjectRequest(
                         Request.Method.POST,
@@ -246,6 +251,26 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         });
 
         super.onViewCreated(view, savedInstanceState);
+    }
+
+    private Boolean isEventNearby(float maxMetersAway, Event event) {
+        LatLng currentLocation = ((MapsActivity)getActivity()).getCurrentLocation();
+
+        Location userLocation = new Location("");
+        userLocation.setLatitude(currentLocation.latitude);
+        userLocation.setLongitude(currentLocation.longitude);
+
+        Location eventLocation = new Location("");
+        eventLocation.setLatitude(event.getLatitude());
+        eventLocation.setLongitude(event.getLongitude());
+
+        float distanceMetres = userLocation.distanceTo(eventLocation);
+
+        if (distanceMetres > maxMetersAway) {
+            return false;
+        }
+
+        return true;
     }
 
 
