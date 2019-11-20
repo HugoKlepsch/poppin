@@ -1,6 +1,7 @@
 package com.example.poppin;
 
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 
 import androidx.annotation.NonNull;
@@ -21,6 +23,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import org.json.JSONException;
@@ -40,6 +43,7 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
     private TextView descriptionView;
     private TextView locationView;
     private TextView txtGroupSize;
+    private TextView distance;
     private ImageButton hypeButton;
     private ImageButton checkinButton;
 
@@ -84,6 +88,29 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         locationView = view.findViewById(R.id.location);
 
         checkinButton = view.findViewById(R.id.checkin);
+
+        distance = view.findViewById(R.id.distance);
+
+        LatLng currentLocation = ((MapsActivity)getActivity()).getCurrentLocation();
+
+        Location userLocation = new Location("");
+        userLocation.setLatitude(currentLocation.latitude);
+        userLocation.setLongitude(currentLocation.longitude);
+
+        Location eventLocation = new Location("");
+        eventLocation.setLatitude(event.getLatitude());
+        eventLocation.setLongitude(event.getLongitude());
+
+        float distanceMetres = userLocation.distanceTo(eventLocation);
+
+
+        if (distanceMetres > 1000.00) {
+            distance.setText(String.format("%.1f km", distanceMetres / 1000));
+        }
+        else {
+            distance.setText(String.format("%.0f m", distanceMetres));
+        }
+
 
         if (event.getWasCheckedIn()) {
             checkinButton.setEnabled(false);
@@ -132,6 +159,10 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                     return;
                 }
 
+
+
+
+
                 JsonRequest request = new JsonObjectRequest(
                         Request.Method.POST,
                         ApplicationNetworkManager.baseAPIURL + "/api/hype/by_id",
@@ -177,6 +208,9 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                     Log.e(TAG, "Failed to apply keys to JSON request object");
                     return;
                 }
+
+
+
 
                 JsonRequest request = new JsonObjectRequest(
                         Request.Method.POST,
