@@ -60,6 +60,8 @@ class Checkin(DB.Model):
 class CheckinSchemaIn(AuthenticatedMessageSchema):
     """Checking Input schema"""
     event_id = fields.Integer()
+    user_latitude = fields.Float()
+    user_longitude = fields.Float()
 
 
 class CheckinSchemaOut(JsonApiSchema):

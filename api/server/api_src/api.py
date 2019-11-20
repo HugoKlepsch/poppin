@@ -5,6 +5,8 @@ import logging
 import os
 import datetime
 
+from math import sin, cos, sqrt, atan2, radians
+
 from flask import Flask
 from flask.logging import create_logger
 from flask_apispec import marshal_with
@@ -19,7 +21,7 @@ from api_src.models import EventSchemaIn, EventSchemaOut, EventQueryByLocationSc
 from api_src.models import HypeSchemaIn
 from api_src.models import Checkin, CheckinSchemaIn
 from api_src.models import AuthenticatedMessageSchema
-from api_src.schema import JSON_CT, INTERNAL_SERVER_ERROR_JSON_RESPONSE, ok_response
+from api_src.schema import JSON_CT, INTERNAL_SERVER_ERROR_JSON_RESPONSE, ok_response, BAD_REQUEST_JSON_RESPONSE
 from api_src.schema import JsonApiSchema
 
 
@@ -294,6 +296,30 @@ def calculate_event_hype(event):
     return event
 
 
+def haversine_distance(lat_a, lng_a, lat_b, lng_b):
+    """
+    Returns the Haversine distance between two points (see Haversine's algorithm)
+    """
+    earth_radius = 6373.0
+
+    rad_lat_a = radians(lat_a)
+    rad_lng_a = radians(lng_a)
+
+    rad_lat_b = radians(lat_b)
+    rad_lng_b = radians(lng_b)
+
+    dlat = rad_lat_b - rad_lat_a
+    dlng = rad_lng_b - rad_lng_a
+
+    const_a = sin(dlat / 2)**2 + cos(rad_lat_a) * cos(rad_lat_b) * sin(dlng / 2)**2
+    const_c = 2 * atan2(sqrt(const_a), sqrt(1 - const_a))
+
+    distance = earth_radius * const_c
+
+    return distance * 1000
+
+
+
 @APP.route('/api/all_accounts', methods=['POST'])
 @use_args(AuthenticatedMessageSchema())
 @authenticated(as_device='testaccount')  # TODO create admin account
@@ -423,6 +449,8 @@ def checkin_event(checkin_data):
     """Endpoint for Checking into an event; creates a new Checkin entry"""
     device_key = checkin_data.get('device_key', None)
     event_id = checkin_data.get('event_id', None)
+    user_latitude = checkin_data.get('user_latitude', None)
+    user_longitude = checkin_data.get('user_longitude', None)
 
     try:
         account = Account.query.filter_by(device_key=device_key).first()
@@ -430,10 +458,18 @@ def checkin_event(checkin_data):
         if Checkin.query.filter_by(account_id=account.id, event_id=event_id).count() > 0:
             return {'msg': 'Cannot checkin to this event again.'}, 409, JSON_CT
 
-        checkin = Checkin(account_id=account.id, event_id=event_id)
-        DB.session.add(checkin)
-        DB.session.commit()
-        return ok_response('Successfully checked in to this event %d' % (event_id))
+        event = Event.query.filter_by(id=event_id).first()
+        if event:
+
+            if haversine_distance(event.latitude, event.longitude, user_latitude, user_longitude) <= 100:
+                checkin = Checkin(account_id=account.id, event_id=event_id)
+                DB.session.add(checkin)
+                DB.session.commit()
+                return ok_response('Successfully checked in to this event %d' % (event_id))
+
+            return BAD_REQUEST_JSON_RESPONSE
+
+        return BAD_REQUEST_JSON_RESPONSE
 
     except SQLAlchemyError as exception:
         APP.logger.exception("Failed to checkin to this event: %s", exception)
