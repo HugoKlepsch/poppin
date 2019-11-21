@@ -173,6 +173,10 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                                 .getDeviceKey(getContext().getApplicationContext()));
                 try {
                     obj.put("event_id", event.getId());
+                    obj.put("user_latitude",
+                            ((MapsActivity) getActivity()).getCurrentLocation().latitude);
+                    obj.put("user_longitude",
+                            ((MapsActivity) getActivity()).getCurrentLocation().longitude);
                 } catch (JSONException e) {
                     Log.e(TAG, "Failed to apply keys to JSON request object");
                     return;
