@@ -19,10 +19,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Map;
 
 public class CreateEventBottomSheetFragment extends BottomSheetDialogFragment {
 
@@ -122,8 +124,8 @@ public class CreateEventBottomSheetFragment extends BottomSheetDialogFragment {
             @Override
             public void onClick(View v) {
                 try {
-                    Event event = new Event(0, 0, // These lat/lon aren't correct, but I can't figure out
-                                                  // How to get the location inside this fragment.
+                    LatLng currentLocation = ((MapsActivity) getActivity()).getCurrentLocation();
+                    Event event = new Event(currentLocation.latitude, currentLocation.longitude,
                             titleEdit.getText().toString(),
                             new Date(), // TODO get the time from user input on this fragment
                             description.getText().toString(),
