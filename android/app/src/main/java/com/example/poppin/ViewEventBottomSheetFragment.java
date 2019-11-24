@@ -1,15 +1,17 @@
 package com.example.poppin;
 
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.ImageView;
+import android.widget.Toast;
 
 
 import androidx.annotation.NonNull;
@@ -21,6 +23,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import org.json.JSONException;
@@ -40,6 +43,7 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
     private TextView descriptionView;
     private TextView locationView;
     private TextView txtGroupSize;
+    private TextView distance;
     private ImageButton hypeButton;
     private ImageButton checkinButton;
 
@@ -84,6 +88,17 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         locationView = view.findViewById(R.id.location);
 
         checkinButton = view.findViewById(R.id.checkin);
+
+        distance = view.findViewById(R.id.distance);
+
+        LatLng currentLocation = ((MapsActivity)getActivity()).getCurrentLocation();
+        double distanceMetres = calculateHaversineDistance(currentLocation, event.getLocation());
+
+        if (distanceMetres > 1000.00) {
+            distance.setText(String.format("%.1f km", distanceMetres / 1000));
+        } else {
+            distance.setText(String.format("%.0f m", distanceMetres));
+        }
 
         if (event.getWasCheckedIn()) {
             checkinButton.setEnabled(false);
@@ -148,7 +163,6 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                                 hypeView.setText(Integer.toString(event.getHype()));
                                 hypeButton.setEnabled(false);
                                 hypeButton.setAlpha(.3f);
-
                             }
                         },
                         new Response.ErrorListener() {
@@ -171,6 +185,7 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                 JSONObject obj = ApplicationNetworkManager
                         .getDefaultAuthenticatedRequest(DeviceKey
                                 .getDeviceKey(getContext().getApplicationContext()));
+
                 try {
                     obj.put("event_id", event.getId());
                     obj.put("user_latitude",
@@ -179,6 +194,15 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                             ((MapsActivity) getActivity()).getCurrentLocation().longitude);
                 } catch (JSONException e) {
                     Log.e(TAG, "Failed to apply keys to JSON request object");
+                    return;
+                }
+
+                if (!isEventNearby(100.00f, event)) {
+                    Toast notifyUser = Toast.makeText(getActivity(),
+                            "You must to be within 100 meters of an event to check in.",
+                            Toast.LENGTH_LONG);
+                    notifyUser.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 10);
+                    notifyUser.show();
                     return;
                 }
 
@@ -218,11 +242,43 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         super.onViewCreated(view, savedInstanceState);
     }
 
+    private Boolean isEventNearby(float maxMetersAway, Event event) {
+        LatLng currentLocation = ((MapsActivity)getActivity()).getCurrentLocation();
+
+        double distanceMetres = calculateHaversineDistance(currentLocation, event.getLocation());
+
+        // a simplified "if greater than, return false"
+        return !(distanceMetres > maxMetersAway);
+    }
+
+    public static double calculateHaversineDistance(LatLng a, LatLng b) {
+        double distance;
+        double earth_radius = 6373.0;
+
+        double latitudeARadians = Math.toRadians(a.latitude);
+        double longitudeARadians = Math.toRadians(a.longitude);
+
+        double latitudeBRadians = Math.toRadians(b.latitude);
+        double longitudeBRadians = Math.toRadians(b.longitude);
+
+        double deltaLatitude = latitudeBRadians - latitudeARadians;
+        double deltaLongitude = longitudeBRadians - longitudeARadians;
+
+        double constA = Math.pow(Math.sin(deltaLatitude / 2), 2) +
+                Math.cos(latitudeARadians) * Math.cos(latitudeBRadians) *
+                        Math.pow(Math.sin(deltaLongitude / 2), 2);
+
+        double constC = 2 * Math.atan2(Math.sqrt(constA), Math.sqrt(1 - constA));
+
+        distance = earth_radius * constC;
+
+        return distance * 1000;
+    }
+
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
         return inflater.inflate(R.layout.view_event_fragment_bottom_sheet, container, false);
     }
 }
