@@ -1,9 +1,9 @@
 """API main"""
 import argparse
+import datetime
 from functools import wraps
 import logging
 import os
-import datetime
 
 from math import sin, cos, sqrt, atan2, radians
 
@@ -15,6 +15,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from webargs.flaskparser import use_args
 
 from api_src.db import DB
+from api_src.garbage_collector import GarbageCollector
 from api_src.models import Account, Event, Hype
 from api_src.models import AccountSchemaOut
 from api_src.models import EventSchemaIn, EventSchemaOut, EventQueryByLocationSchema
@@ -512,9 +513,12 @@ def main():
     """Main"""
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=80)
-    args = parser.parse_args()
+    arguments = parser.parse_args()
 
-    APP.run(debug=True, host='0.0.0.0', port=args.port, use_reloader=False)
+    collector = GarbageCollector(DB, APP, datetime.timedelta(hours=1), retention_period=datetime.timedelta(hours=24))
+    collector.start()
+
+    APP.run(debug=True, host='0.0.0.0', port=arguments.port, use_reloader=False)
 
 
 if __name__ == '__main__':

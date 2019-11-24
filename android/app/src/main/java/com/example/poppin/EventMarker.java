@@ -11,6 +11,7 @@ import androidx.annotation.RequiresApi;
 public class EventMarker {
     public double latitude, longitude;
     public String title;
+    public Marker markerRef;
 
     @Override
     public boolean equals(Object o) {
@@ -32,5 +33,6 @@ public class EventMarker {
         this.latitude = marker.getPosition().latitude;
         this.longitude = marker.getPosition().longitude;
         this.title = marker.getTitle();
+        this.markerRef = marker;
     }
 }

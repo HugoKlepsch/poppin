@@ -60,8 +60,8 @@ public class Event implements Serializable {
         this.setRecommendedGroupSizeMax(groupSizeMax);
         this.setRecommendedGroupSizeMin(groupSizeMin);
 
-        this.setCheckins(100);
-        this.setHype(100);
+        this.setCheckins(0);
+        this.setHype(0);
 
         this.wasCheckedIn = false;
         this.wasHyped = false;

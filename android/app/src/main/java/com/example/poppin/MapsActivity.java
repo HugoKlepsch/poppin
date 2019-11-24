@@ -306,6 +306,11 @@ public class MapsActivity extends FragmentActivity
                                 + " length: " + response.length());
                         try {
 
+                            for (EventMarker em : markerMap.keySet()) {
+                                em.markerRef.remove();
+                            }
+                            markerMap.clear();
+
                             for (int i = 0; i < response.length(); i++) {
                                 try {
                                     Event event = new Event((JSONObject) response.get(i));
@@ -494,7 +499,6 @@ public class MapsActivity extends FragmentActivity
     @Override
     public void onCameraIdle() {
         Log.d(TAG, "Camera Idle, getting events");
-        markerMap.clear();
         loadEventsFromAPI();
     }
 }
