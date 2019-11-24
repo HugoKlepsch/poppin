@@ -188,7 +188,7 @@ public class MapsActivity extends FragmentActivity
 
         sendEventToAPI(event);
 
-        addEventToMap(event);
+        loadEventsFromAPI();
     }
 
     private double chopDouble(double d) {
@@ -343,7 +343,7 @@ public class MapsActivity extends FragmentActivity
                 .addToRequestQueue(request);
     }
 
-    public void sendEventToAPI(Event event) {
+    public void sendEventToAPI(final Event event) {
         JSONObject obj = ApplicationNetworkManager
                 .getDefaultAuthenticatedRequest(
                         DeviceKey.getDeviceKey(this.getApplicationContext()));
@@ -351,7 +351,7 @@ public class MapsActivity extends FragmentActivity
         Log.d(TAG, "sendEventToAPI start");
 
         // Merge the authenticated JSONObject with the event JSONObject. This kind of sucks.
-        JSONObject event_obj = event.serialize();
+        final JSONObject event_obj = event.serialize();
         Iterator<String> keys = event_obj.keys();
         String key;
         while (keys.hasNext()) {
@@ -375,12 +375,16 @@ public class MapsActivity extends FragmentActivity
                     public void onResponse(JSONObject response) {
                         Log.d(TAG, "sendEventToAPI onResponse. response: " + response.toString()
                                 + " length: " + response.length());
+
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(TAG, "sendEventToAPI error response" + error.toString());
+                        Toast.makeText(MapsActivity.this,
+                                "Woah, too fast! Please wait a few seconds.",
+                                Toast.LENGTH_LONG).show();
                     }
                 }
         );

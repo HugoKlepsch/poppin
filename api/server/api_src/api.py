@@ -14,6 +14,7 @@ from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 from webargs.flaskparser import use_args
 
+from api_src.limiter import IP_LIMITER, KEY_LIMITER
 from api_src.db import DB
 from api_src.garbage_collector import GarbageCollector
 from api_src.models import Account, Event, Hype
@@ -52,6 +53,8 @@ def create_app():  # {{{
     _app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     DB.init_app(_app)
+    IP_LIMITER.init_app(_app)
+    KEY_LIMITER.init_app(_app)
 
     return _app
 # }}}
@@ -337,6 +340,8 @@ def all_accounts(_payload):
 
 @APP.route('/api/events/by_location', methods=['POST'])
 @use_args(EventQueryByLocationSchema())
+@IP_LIMITER.limit('5 per 1 seconds')
+@KEY_LIMITER.limit('5 per 1 seconds')
 @authenticated()
 @marshal_with(EventSchemaOut(many=True))
 def events_for_area(payload):
@@ -377,6 +382,8 @@ def events_for_area(payload):
 
 @APP.route('/api/events/by_device_key', methods=['POST'])
 @use_args(AuthenticatedMessageSchema())
+@IP_LIMITER.limit('5 per 1 second')
+@KEY_LIMITER.limit('5 per 1 second')
 @authenticated()
 @marshal_with(EventSchemaOut(many=True))
 def events_for_account_id(payload):
@@ -400,6 +407,8 @@ def events_for_account_id(payload):
 
 @APP.route('/api/event', methods=['POST'])
 @use_args(EventSchemaIn())
+@IP_LIMITER.limit('1 per 10 seconds')
+@KEY_LIMITER.limit('1 per 10 seconds')
 @authenticated()
 @marshal_with(JsonApiSchema())
 def create_event(event_data):
@@ -444,6 +453,8 @@ def create_event(event_data):
 
 @APP.route('/api/checkin/by_id', methods=['POST'])
 @use_args(CheckinSchemaIn())
+@IP_LIMITER.limit('1 per 5 seconds')
+@KEY_LIMITER.limit('1 per 5 seconds')
 @authenticated()
 @marshal_with(JsonApiSchema())
 def checkin_event(checkin_data):
@@ -479,6 +490,8 @@ def checkin_event(checkin_data):
 
 @APP.route('/api/hype/by_id', methods=['POST'])
 @use_args(HypeSchemaIn())
+@IP_LIMITER.limit('1 per 2 seconds')
+@KEY_LIMITER.limit('1 per 2 seconds')
 @authenticated()
 @marshal_with(JsonApiSchema())
 def hype_event(hype_data):
