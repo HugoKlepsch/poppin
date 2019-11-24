@@ -241,21 +241,10 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
     private Boolean isEventNearby(float maxMetersAway, Event event) {
         LatLng currentLocation = ((MapsActivity)getActivity()).getCurrentLocation();
 
-        Location userLocation = new Location("");
-        userLocation.setLatitude(currentLocation.latitude);
-        userLocation.setLongitude(currentLocation.longitude);
+        double distanceMetres = calculateHaversineDistance(currentLocation, event.getLocation());
 
-        Location eventLocation = new Location("");
-        eventLocation.setLatitude(event.getLatitude());
-        eventLocation.setLongitude(event.getLongitude());
-
-        float distanceMetres = userLocation.distanceTo(eventLocation);
-
-        if (distanceMetres > maxMetersAway) {
-            return false;
-        }
-
-        return true;
+        // a simplified "if greater than, return false"
+        return !(distanceMetres > maxMetersAway);
     }
 
     public static double calculateHaversineDistance(LatLng a, LatLng b) {
