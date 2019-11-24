@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 
@@ -93,25 +92,13 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         distance = view.findViewById(R.id.distance);
 
         LatLng currentLocation = ((MapsActivity)getActivity()).getCurrentLocation();
-
-        Location userLocation = new Location("");
-        userLocation.setLatitude(currentLocation.latitude);
-        userLocation.setLongitude(currentLocation.longitude);
-
-        Location eventLocation = new Location("");
-        eventLocation.setLatitude(event.getLatitude());
-        eventLocation.setLongitude(event.getLongitude());
-
-        float distanceMetres = userLocation.distanceTo(eventLocation);
-
+        double distanceMetres = calculateHaversineDistance(currentLocation, event.getLocation());
 
         if (distanceMetres > 1000.00) {
             distance.setText(String.format("%.1f km", distanceMetres / 1000));
-        }
-        else {
+        } else {
             distance.setText(String.format("%.0f m", distanceMetres));
         }
-
 
         if (event.getWasCheckedIn()) {
             checkinButton.setEnabled(false);
@@ -176,7 +163,6 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                                 hypeView.setText(Integer.toString(event.getHype()));
                                 hypeButton.setEnabled(false);
                                 hypeButton.setAlpha(.3f);
-
                             }
                         },
                         new Response.ErrorListener() {
@@ -199,6 +185,7 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                 JSONObject obj = ApplicationNetworkManager
                         .getDefaultAuthenticatedRequest(DeviceKey
                                 .getDeviceKey(getContext().getApplicationContext()));
+
                 try {
                     obj.put("event_id", event.getId());
                 } catch (JSONException e) {
@@ -206,16 +193,14 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
                     return;
                 }
 
-
-
                 if (!isEventNearby(100.00f, event)) {
-                    Toast notifyUser = Toast.makeText(getActivity(), "You must to be within 100 meters of an event to check in.", Toast.LENGTH_LONG);
+                    Toast notifyUser = Toast.makeText(getActivity(),
+                            "You must to be within 100 meters of an event to check in.",
+                            Toast.LENGTH_LONG);
                     notifyUser.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 10);
                     notifyUser.show();
                     return;
                 }
-
-
 
                 JsonRequest request = new JsonObjectRequest(
                         Request.Method.POST,
@@ -273,11 +258,34 @@ public class ViewEventBottomSheetFragment extends BottomSheetDialogFragment {
         return true;
     }
 
+    public static double calculateHaversineDistance(LatLng a, LatLng b) {
+        double distance;
+        double earth_radius = 6373.0;
+
+        double latitudeARadians = Math.toRadians(a.latitude);
+        double longitudeARadians = Math.toRadians(a.longitude);
+
+        double latitudeBRadians = Math.toRadians(b.latitude);
+        double longitudeBRadians = Math.toRadians(b.longitude);
+
+        double deltaLatitude = latitudeBRadians - latitudeARadians;
+        double deltaLongitude = longitudeBRadians - longitudeARadians;
+
+        double constA = Math.pow(Math.sin(deltaLatitude / 2), 2) +
+                Math.cos(latitudeARadians) * Math.cos(latitudeBRadians) *
+                        Math.pow(Math.sin(deltaLongitude / 2), 2);
+
+        double constC = 2 * Math.atan2(Math.sqrt(constA), Math.sqrt(1 - constA));
+
+        distance = earth_radius * constC;
+
+        return distance * 1000;
+    }
+
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
         return inflater.inflate(R.layout.view_event_fragment_bottom_sheet, container, false);
     }
 }
