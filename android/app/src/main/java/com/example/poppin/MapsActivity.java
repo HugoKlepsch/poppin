@@ -400,12 +400,14 @@ public class MapsActivity extends FragmentActivity
     }
 
     public void addEventToMap(Event event) {
-
         MarkerOptions options = new MarkerOptions()
                 .position(event.getLocation())
                 .title(event.getTitle())
-                .snippet(event.getCategory())
-                .icon(BitmapDescriptorFactory.fromBitmap(textAsBitmap(event.getEmoji(), 75 )));
+                .snippet(event.getCategory());
+
+        if (!event.getEmoji().equals("") || event.getEmoji() == null) {
+            options = options.icon(BitmapDescriptorFactory.fromBitmap(textAsBitmap(event.getEmoji(), 80)));
+        }
 
         Marker marker = mMap.addMarker(options);
 
@@ -418,8 +420,8 @@ public class MapsActivity extends FragmentActivity
         paint.setColor(ContextCompat.getColor(this.getApplicationContext(), R.color.colorAccent));
 
         paint.setTextAlign(Paint.Align.LEFT);
-        float baseline = -paint.ascent(); // ascent() is negative
-        int width = (int) (paint.measureText(text) + 0.5f); // round
+        float baseline = -paint.ascent();
+        int width = (int) (paint.measureText(text) + 0.5f);
         int height = (int) (baseline + paint.descent() + 0.5f);
         Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(image);
