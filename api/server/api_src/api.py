@@ -75,6 +75,7 @@ def setup_database(_app):  # {{{
             DB.session.add(example_account)
             DB.session.commit()
 
+
         test_accounts = [Account()] * 5  # five test accounts
         for i, _ in enumerate(test_accounts):
             test_accounts[i] = Account.query.filter_by(device_key='testaccount{i}'.format(i=i)).first()
@@ -90,7 +91,7 @@ def setup_database(_app):  # {{{
             example_event = Event(account_id=example_account.id, latitude=32.079663, longitude=34.775528,
                                   group_size_max=3, group_size_min=1, title="Isreal is real",
                                   category="Social", time=datetime.datetime.utcnow(),
-                                  description="Let us come together in peace. 3 hypes")
+                                  description="Let us come together in peace. 3 hypes", emoji="🤣")
             DB.session.add(example_event)
             DB.session.commit()
             for i in range(3):
@@ -100,7 +101,7 @@ def setup_database(_app):  # {{{
             example_event_two = Event(account_id=example_account.id, latitude=43.545199, longitude=-80.246926,
                                       group_size_max=5, group_size_min=3, title="Trappers halloween costume party",
                                       category="Social drinking", time=datetime.datetime.utcnow(),
-                                      description="BYOB costume party. Hawaiian theme. 5 hypes")
+                                      description="BYOB costume party. Hawaiian theme. 5 hypes", emoji="🤣")
             DB.session.add(example_event_two)
             DB.session.commit()
             for i in range(5):
@@ -110,7 +111,7 @@ def setup_database(_app):  # {{{
             example_event_three = Event(account_id=example_account.id, latitude=43.530793, longitude=-80.229077,
                                         group_size_max=1, group_size_min=1, title="LAN party in Reynolds!",
                                         category="Sports", time=datetime.datetime.utcnow(),
-                                        description="Bring a laptop and Halo CE for the LAN party. 3 hypes")
+                                        description="Bring a laptop and Halo CE for the LAN party. 3 hypes", emoji="🤣")
             DB.session.add(example_event_three)
             DB.session.commit()
             for i in range(3):
@@ -120,7 +121,7 @@ def setup_database(_app):  # {{{
             example_event_four = Event(account_id=example_account.id, latitude=43.531793, longitude=-80.228077,
                                        group_size_max=1, group_size_min=1, title="Vapers anonymous",
                                        category="Social", time=datetime.datetime.utcnow(),
-                                       description="0 hypes")
+                                       description="0 hypes", emoji="🤣")
             DB.session.add(example_event_four)
             DB.session.commit()
 
@@ -425,6 +426,7 @@ def create_event(event_data):
     time = event_data.get('time', None)
     description = event_data.get('description', None)
     category = event_data.get('category', None)
+    emoji = event_data.get('emoji', None)
 
     group_size_min = event_data.get('group_size_min', None)
     group_size_max = event_data.get('group_size_max', None)
@@ -441,7 +443,8 @@ def create_event(event_data):
                       group_size_min=group_size_min,
                       title=title,
                       description=description,
-                      category=category)
+                      category=category,
+                      emoji=emoji)
 
         DB.session.add(event)
         DB.session.commit()

@@ -13,6 +13,7 @@ public class EventMarker {
     public String title;
     public Marker markerRef;
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

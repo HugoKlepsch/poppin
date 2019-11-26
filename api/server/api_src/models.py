@@ -30,6 +30,7 @@ class Event(DB.Model):
     title = DB.Column(DB.String(50), nullable=False)
     category = DB.Column(DB.String(50), nullable=False)
     description = DB.Column(DB.String(140), nullable=False)
+    emoji = DB.Column(DB.String(140), nullable=False)
     create_date = DB.Column(DB.DateTime, nullable=False, default=datetime.utcnow)
 
 
@@ -85,6 +86,7 @@ class EventSchemaIn(AuthenticatedMessageSchema):
     title = fields.String()
     category = fields.String()
     description = fields.String()
+    emoji = fields.String()
 
 
 # TODO I don't like putting these schemas here, but I don't have a better place for them yet.
@@ -113,6 +115,7 @@ class EventSchemaOut(JsonApiSchema):
     checkins = fields.Integer()
     was_checkedin = fields.Boolean()
     was_hyped = fields.Boolean()
+    emoji = fields.String()
 
 
 class AccountSchemaOut(JsonApiSchema):

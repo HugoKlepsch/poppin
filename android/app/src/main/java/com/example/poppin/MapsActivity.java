@@ -10,7 +10,10 @@ import androidx.fragment.app.FragmentManager;
 import android.content.Context;
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -33,6 +36,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -396,14 +400,31 @@ public class MapsActivity extends FragmentActivity
     }
 
     public void addEventToMap(Event event) {
+
         MarkerOptions options = new MarkerOptions()
                 .position(event.getLocation())
                 .title(event.getTitle())
-                .snippet(event.getCategory());
+                .snippet(event.getCategory())
+                .icon(BitmapDescriptorFactory.fromBitmap(textAsBitmap(event.getEmoji(), 75 )));
 
         Marker marker = mMap.addMarker(options);
 
         markerMap.put(new EventMarker(marker), event);
+    }
+
+    public Bitmap textAsBitmap(String text, float textSize) {
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setTextSize(textSize);
+        paint.setColor(ContextCompat.getColor(this.getApplicationContext(), R.color.colorAccent));
+
+        paint.setTextAlign(Paint.Align.LEFT);
+        float baseline = -paint.ascent(); // ascent() is negative
+        int width = (int) (paint.measureText(text) + 0.5f); // round
+        int height = (int) (baseline + paint.descent() + 0.5f);
+        Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(image);
+        canvas.drawText(text, 0, baseline, paint);
+        return image;
     }
 
     @Override

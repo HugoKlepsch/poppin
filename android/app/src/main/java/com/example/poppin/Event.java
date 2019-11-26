@@ -28,6 +28,7 @@ public class Event implements Serializable {
     private int recommendedGroupSizeMin;
     private int recommendedGroupSizeMax;
     private boolean wasCheckedIn;
+    private String emoji;
 
     final static private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");;
 
@@ -36,6 +37,8 @@ public class Event implements Serializable {
     private boolean wasHyped;
 
     private double hotness;
+
+
 
     /**
      *
@@ -47,7 +50,7 @@ public class Event implements Serializable {
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
     public Event(double lat, double lon, String title, Date time, String description,
-                 String category, int groupSizeMax, int groupSizeMin) throws ParseException {
+                 String category, int groupSizeMax, int groupSizeMin, String emoji) throws ParseException {
         formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         this.id = null;
@@ -59,13 +62,14 @@ public class Event implements Serializable {
         /* Temporary setting default data */
         this.setRecommendedGroupSizeMax(groupSizeMax);
         this.setRecommendedGroupSizeMin(groupSizeMin);
-
+        this.emoji = emoji;
         this.setCheckins(0);
         this.setHype(0);
 
         this.wasCheckedIn = false;
         this.wasHyped = false;
     }
+
 
 
     /**
@@ -87,6 +91,7 @@ public class Event implements Serializable {
         this.hotness = jsonObj.optDouble("hotness");
         this.recommendedGroupSizeMax = jsonObj.getInt("group_size_max");
         this.recommendedGroupSizeMin = jsonObj.getInt("group_size_min");
+        this.emoji = jsonObj.optString("emoji");
         this.wasHyped = jsonObj.has("was_hyped") && jsonObj.getBoolean("was_hyped");
         this.wasCheckedIn = jsonObj.has("was_checkedin") && jsonObj.getBoolean("was_checkedin");
     }
@@ -115,6 +120,8 @@ public class Event implements Serializable {
             json.put("hotness", hotness);
             json.put("group_size_max", recommendedGroupSizeMax);
             json.put("group_size_min", recommendedGroupSizeMin);
+            json.put("emoji", emoji);
+
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -355,5 +362,13 @@ public class Event implements Serializable {
 
     public boolean wasHyped() {
         return this.wasHyped;
+    }
+
+    public String getEmoji() {
+        return emoji;
+    }
+
+    public void setEmoji(String emoji) {
+        this.emoji = emoji;
     }
 }
