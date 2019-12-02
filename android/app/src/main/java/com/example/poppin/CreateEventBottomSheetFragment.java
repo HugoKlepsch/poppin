@@ -14,10 +14,15 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.core.provider.FontRequest;
+import androidx.emoji.text.EmojiCompat;
+import androidx.emoji.text.FontRequestEmojiCompatConfig;
+import androidx.emoji.widget.EmojiEditText;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -25,22 +30,33 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CreateEventBottomSheetFragment extends BottomSheetDialogFragment {
 
+    private static final int CERTIFICATES = 1;
     private EditText titleEdit;
     private NumberPicker groupSizeMin, groupSizeMax, categorySelect;
     private TextView location, time, category;
     private EditText description;
     private ImageButton createEventButton;
-
+    private EmojiEditText emojiEdit;
     private String[] categories = {"Fun", "Professional","Party",  "Academic"};
+    public static final String regex = "^([\\u20a0-\\u32ff\\ud83c\\udc00-\\ud83d\\udeff\\udbb9\\udce5-\\udbb9\\udcee])$";
+
+    public static final String regex2 = "^(\\u00a9|\\u00ae|[\\u2000-\\u3300]|\\ud83c[\\ud000-\\udfff]|\\ud83d[\\ud000-\\udfff]|\\ud83e[\\ud000-\\udfff])$";
+
+
+    private String lastValidEmoji = "";
+    private String lastValidInput = "";
 
     private OnEventCreationListener listener;
 
     public interface OnEventCreationListener {
         void onEventCreate(Event event);
     }
+
 
     private TextWatcher mTextWatcher = new TextWatcher() {
         @Override
@@ -59,6 +75,52 @@ public class CreateEventBottomSheetFragment extends BottomSheetDialogFragment {
         }
     };
 
+    private TextWatcher mEmojiWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+
+            String newEmojiInput = editable.toString();
+
+            /* They have changed the input */
+            if (!lastValidEmoji.equals(newEmojiInput) && !lastValidInput.equals(newEmojiInput) ) {
+
+
+                Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+                Matcher matcher = p.matcher(newEmojiInput);
+
+                if (matcher.find()) {
+                    lastValidEmoji = newEmojiInput;
+                    lastValidInput = newEmojiInput;
+                    emojiEdit.setText(newEmojiInput);
+
+                }
+                else if (newEmojiInput.equals("") )
+                {
+                    lastValidInput = newEmojiInput;
+                    emojiEdit.setText(newEmojiInput);
+                }
+                else {
+                    emojiEdit.setText(lastValidInput);
+                }
+
+
+            }
+
+
+
+        }
+    };
 
     public void checkForEmptyText() {
 
@@ -87,6 +149,14 @@ public class CreateEventBottomSheetFragment extends BottomSheetDialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        FontRequest fontRequest = new FontRequest(
+                "com.example.fontprovider",
+                "com.example",
+                "emoji compat Font Query",
+                CERTIFICATES);
+        EmojiCompat.Config config = new FontRequestEmojiCompatConfig(getContext(), fontRequest);
+        EmojiCompat.init(config);
     }
 
 
@@ -102,8 +172,9 @@ public class CreateEventBottomSheetFragment extends BottomSheetDialogFragment {
         category = view.findViewById(R.id.category);
         description = view.findViewById(R.id.description);
         createEventButton = view.findViewById(R.id.createEventButton);
+        emojiEdit = view.findViewById(R.id.emoji_text_edit);
 
-
+        emojiEdit.addTextChangedListener(mEmojiWatcher);
         titleEdit.addTextChangedListener(mTextWatcher);
         checkForEmptyText();
         setupGroupSizePickers(view);
@@ -113,7 +184,7 @@ public class CreateEventBottomSheetFragment extends BottomSheetDialogFragment {
             // Doing this just to get the current local time formatted right.
             Event event = new Event(0, 0, "",
                     new Date(),
-                    "", "", 99, 1);
+                    "", "", 99, 1, "");
             time.setText(event.getLocalTime());
         } catch (ParseException e) {
             e.printStackTrace();
@@ -131,7 +202,8 @@ public class CreateEventBottomSheetFragment extends BottomSheetDialogFragment {
                             description.getText().toString(),
                             categories[categorySelect.getValue()],
                             groupSizeMax.getValue(),
-                            groupSizeMin.getValue());
+                            groupSizeMin.getValue(),
+                            emojiEdit.getText().toString());
 
                     listener.onEventCreate(event);
                 } catch (ParseException e) {
